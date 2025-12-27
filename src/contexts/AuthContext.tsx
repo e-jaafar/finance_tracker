@@ -46,6 +46,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return signOut(auth);
     }
 
+    function signInWithGoogle() {
+        return signInWithPopup(auth, googleProvider);
+    }
+
     function updateUserEmail(email: string) {
         if (!currentUser) throw new Error("No user logged in");
         return updateEmail(currentUser, email);

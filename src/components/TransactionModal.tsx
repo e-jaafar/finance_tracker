@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useTransactions } from "../hooks/useTransactions";
+import { X, Check } from "lucide-react";
 import type { Transaction } from "../hooks/useTransactions";
-import { X } from "lucide-react";
 
 interface TransactionModalProps {
     isOpen: boolean;
@@ -9,20 +9,18 @@ interface TransactionModalProps {
     existingTransaction?: Transaction | null;
 }
 
-export default function TransactionModal({
-    isOpen,
-    onClose,
-    existingTransaction,
-}: TransactionModalProps) {
+export default function TransactionModal({ isOpen, onClose, existingTransaction }: TransactionModalProps) {
+    const { addTransaction, updateTransaction } = useTransactions();
+
+    // State
     const [type, setType] = useState<"income" | "expense">("expense");
-    // We use state for inputs to easily handle pre-filling
     const [amount, setAmount] = useState("");
     const [description, setDescription] = useState("");
     const [category, setCategory] = useState("");
     const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+    const [loading, setLoading] = useState(false);
 
-    const { addTransaction, updateTransaction } = useTransactions();
-
+    // Populate form if editing
     useEffect(() => {
         if (existingTransaction) {
             setType(existingTransaction.type);
@@ -31,7 +29,7 @@ export default function TransactionModal({
             setCategory(existingTransaction.category);
             setDate(existingTransaction.date);
         } else {
-            // Reset defaults when opening in Add mode
+            // Reset if adding new
             setType("expense");
             setAmount("");
             setDescription("");
@@ -40,142 +38,148 @@ export default function TransactionModal({
         }
     }, [existingTransaction, isOpen]);
 
+    if (!isOpen) return null;
+
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        if (!amount || !description || !category || !date) return;
+        setLoading(true);
 
-        if (existingTransaction) {
-            await updateTransaction(existingTransaction.id, {
+        try {
+            const transactionData = {
                 type,
                 amount: parseFloat(amount),
                 description,
                 category,
                 date,
-            });
-        } else {
-            await addTransaction(
-                type,
-                parseFloat(amount),
-                description,
-                category,
-                date
-            );
-        }
+            };
 
-        onClose();
+            if (existingTransaction) {
+                await updateTransaction(existingTransaction.id, transactionData);
+            } else {
+                await addTransaction(transactionData);
+            }
+            onClose();
+        } catch (error) {
+            console.error(error);
+        }
+        setLoading(false);
     }
 
-    if (!isOpen) return null;
+    const inputClassName = "w-full rounded-xl border border-white/10 bg-background px-4 py-3 text-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder-text-muted";
+    const labelClassName = "mb-2 block text-xs font-bold text-text-secondary uppercase tracking-wide";
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-            <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl relative">
-                <button
-                    onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-                >
-                    <X size={20} />
-                </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-surface shadow-2xl animate-in zoom-in-95 duration-200">
 
-                <h2 className="mb-4 text-xl font-bold text-gray-800">
-                    {existingTransaction ? "Modifier la Transaction" : "Nouvelle Transaction"}
-                </h2>
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-4 flex gap-2 rounded-lg bg-gray-100 p-1">
+                {/* Header */}
+                <div className="flex items-center justify-between border-b border-white/5 bg-white/5 px-6 py-4">
+                    <h2 className="text-lg font-bold text-white">
+                        {existingTransaction ? "Edit Transaction" : "New Transaction"}
+                    </h2>
+                    <button onClick={onClose} className="rounded-full p-1 text-text-muted hover:bg-white/10 hover:text-white transition">
+                        <X size={20} />
+                    </button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="p-6 space-y-5">
+
+                    {/* Type Selector */}
+                    <div className="flex gap-4 mb-6">
                         <button
                             type="button"
                             onClick={() => setType("expense")}
-                            className={`flex-1 rounded-md py-2 text-sm font-medium transition ${type === "expense"
-                                ? "bg-white text-red-600 shadow-sm"
-                                : "text-gray-500 hover:text-gray-700"
+                            className={`flex-1 rounded-xl py-3 text-sm font-bold transition-all ${type === "expense"
+                                    ? "bg-red-500/20 text-red-400 border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.2)]"
+                                    : "bg-surfaceHighlight text-text-muted hover:bg-white/5 hover:text-white border border-transparent"
                                 }`}
                         >
-                            Dépense
+                            Expense
                         </button>
                         <button
                             type="button"
                             onClick={() => setType("income")}
-                            className={`flex-1 rounded-md py-2 text-sm font-medium transition ${type === "income"
-                                ? "bg-white text-green-600 shadow-sm"
-                                : "text-gray-500 hover:text-gray-700"
+                            className={`flex-1 rounded-xl py-3 text-sm font-bold transition-all ${type === "income"
+                                    ? "bg-green-500/20 text-green-400 border border-green-500/50 shadow-[0_0_15px_rgba(34,197,94,0.2)]"
+                                    : "bg-surfaceHighlight text-text-muted hover:bg-white/5 hover:text-white border border-transparent"
                                 }`}
                         >
-                            Revenu
+                            Income
                         </button>
                     </div>
 
-                    <div className="mb-4">
-                        <label className="mb-1 block text-xs font-semibold uppercase text-gray-500">
-                            Montant
-                        </label>
-                        <input
-                            type="number"
-                            step="0.01"
-                            required
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
-                            className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-900 placeholder-gray-400 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all"
-                            placeholder="0.00"
-                        />
+                    <div className="grid grid-cols-2 gap-5">
+                        <div className="col-span-2 sm:col-span-1">
+                            <label className={labelClassName}>Amount ($)</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                required
+                                value={amount}
+                                onChange={(e) => setAmount(e.target.value)}
+                                className={inputClassName}
+                                placeholder="0.00"
+                            />
+                        </div>
+                        <div className="col-span-2 sm:col-span-1">
+                            <label className={labelClassName}>Date</label>
+                            <input
+                                type="date"
+                                required
+                                value={date}
+                                onChange={(e) => setDate(e.target.value)}
+                                className={inputClassName}
+                            />
+                        </div>
                     </div>
 
-                    <div className="mb-4">
-                        <label className="mb-1 block text-xs font-semibold uppercase text-gray-500">
-                            Date
-                        </label>
-                        <input
-                            type="date"
-                            required
-                            value={date}
-                            onChange={(e) => setDate(e.target.value)}
-                            className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-900 placeholder-gray-400 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all"
-                        />
-                    </div>
-
-                    <div className="mb-4">
-                        <label className="mb-1 block text-xs font-semibold uppercase text-gray-500">
-                            Catégorie
-                        </label>
-                        <input
-                            type="text"
-                            required
-                            value={category}
-                            onChange={(e) => setCategory(e.target.value)}
-                            className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-900 placeholder-gray-400 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all"
-                            placeholder="Ex: Alimentation, Salaire"
-                        />
-                    </div>
-
-                    <div className="mb-6">
-                        <label className="mb-1 block text-xs font-semibold uppercase text-gray-500">
-                            Description
-                        </label>
+                    <div>
+                        <label className={labelClassName}>Description</label>
                         <input
                             type="text"
                             required
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-900 placeholder-gray-400 outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all"
-                            placeholder="Qu'est-ce que c'est ?"
+                            className={inputClassName}
+                            placeholder="e.g. Grocery Shopping"
                         />
                     </div>
 
-                    <div className="flex gap-3">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="flex-1 rounded border border-gray-300 bg-white py-2 font-semibold text-gray-700 hover:bg-gray-50"
-                        >
-                            Annuler
-                        </button>
+                    <div>
+                        <label className={labelClassName}>Category</label>
+                        <input
+                            type="text"
+                            list="category-suggestions"
+                            required
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
+                            className={inputClassName}
+                            placeholder="e.g. Food"
+                        />
+                        <datalist id="category-suggestions">
+                            <option value="Food" />
+                            <option value="Transport" />
+                            <option value="Utilities" />
+                            <option value="Entertainment" />
+                            <option value="Salary" />
+                            <option value="Health" />
+                        </datalist>
+                    </div>
+
+                    <div className="pt-4">
                         <button
                             type="submit"
-                            className={`flex-1 rounded py-2 font-bold text-white transition ${type === "expense"
-                                ? "bg-red-600 hover:bg-red-700"
-                                : "bg-green-600 hover:bg-green-700"
-                                }`}
+                            disabled={loading}
+                            className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3.5 font-bold text-white shadow-lg shadow-indigo-600/20 transition-all hover:bg-indigo-500 hover:scale-[1.02] disabled:opacity-70 disabled:hover:scale-100"
                         >
-                            {existingTransaction ? "Mettre à jour" : "Ajouter"}
+                            {loading ? (
+                                <span className="animate-pulse">Saving...</span>
+                            ) : (
+                                <>
+                                    <Check size={20} />
+                                    {existingTransaction ? "Update Transaction" : "Save Transaction"}
+                                </>
+                            )}
                         </button>
                     </div>
                 </form>

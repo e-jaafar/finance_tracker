@@ -81,122 +81,145 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 pb-20">
+        <div className="min-h-screen bg-background pb-20 text-text-primary font-sans selection:bg-primary selection:text-white">
             {/* Header */}
-            <div className="bg-white shadow">
-                <div className="container mx-auto px-4">
-                    <div className="flex items-center justify-between py-4">
-                        <div className="flex items-center gap-2">
-                            <div className="bg-blue-600 p-2 rounded-lg text-white">
-                                <Wallet size={24} />
+            <header className="sticky top-0 z-30 border-b border-white/5 bg-background/80 backdrop-blur-xl">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex h-16 items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 text-white shadow-lg shadow-indigo-500/20">
+                                <Wallet size={20} />
                             </div>
-                            <h1 className="text-xl font-bold text-gray-800 hidden md:block">FinanceTracker</h1>
+                            <h1 className="text-lg font-bold tracking-tight text-white hidden md:block">
+                                Finance<span className="text-indigo-400">Tracker</span>
+                            </h1>
                         </div>
 
-                        <div className="flex items-center gap-4">
-                            <span className="text-sm text-gray-600 hidden md:inline">
-                                {currentUser?.email}
-                            </span>
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3 mr-4">
+                                <span className="text-xs font-medium text-text-secondary hidden md:block">
+                                    {currentUser?.email}
+                                </span>
+                            </div>
+
                             <button
                                 onClick={() => navigate("/profile")}
-                                className="flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition"
+                                className="group flex h-9 items-center justify-center gap-2 rounded-lg border border-white/10 bg-surface px-4 text-sm font-medium text-text-secondary transition-all hover:bg-surfaceHighlight hover:text-white hover:border-white/20"
                             >
-                                <User size={16} />
-                                <span className="hidden md:inline">Profile</span>
+                                <User size={16} className="text-indigo-400 group-hover:text-indigo-300" />
+                                <span className="hidden sm:inline">Profile</span>
                             </button>
                             <button
                                 onClick={handleLogout}
-                                className="flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition"
+                                className="group flex h-9 items-center justify-center gap-2 rounded-lg border border-white/10 bg-surface px-4 text-sm font-medium text-text-secondary transition-all hover:bg-surfaceHighlight hover:text-white hover:border-white/20"
                             >
-                                <LogOut size={16} />
-                                <span className="hidden md:inline">Log Out</span>
+                                <LogOut size={16} className="text-red-400 group-hover:text-red-300" />
+                                <span className="hidden sm:inline">Log Out</span>
                             </button>
                         </div>
                     </div>
                 </div>
-            </div>
+            </header>
 
-            <div className="container mx-auto px-4 pt-8">
+            <main className="container mx-auto px-4 sm:px-6 lg:px-8 pt-8">
                 {error && (
-                    <div className="mb-6 rounded-lg bg-red-100 p-4 text-red-700 border border-red-200 shadow-sm">
+                    <div className="mb-8 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm font-medium text-red-200">
                         {error}
                     </div>
                 )}
 
                 {/* Summary Cards */}
-                <div className="grid gap-6 md:grid-cols-3 mb-8">
-                    <div className="rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 p-6 text-white shadow-lg">
-                        <h3 className="mb-2 text-blue-100 font-medium">Total Balance</h3>
-                        <p className="text-3xl font-bold">${balance.toFixed(2)}</p>
+                <div className="grid gap-6 md:grid-cols-3 mb-10">
+                    {/* Total Balance */}
+                    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-800 to-slate-900 p-6 text-white shadow-2xl">
+                        <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-white/5 blur-2xl"></div>
+                        <h3 className="mb-1 text-sm font-medium text-slate-400">Total Balance</h3>
+                        <p className="text-4xl font-extrabold tracking-tight text-white">${balance.toFixed(2)}</p>
                     </div>
-                    <div className="rounded-xl bg-white p-6 shadow-md border border-gray-100">
-                        <h3 className="mb-2 text-gray-500 font-medium uppercase text-xs">Total Income</h3>
-                        <p className="text-3xl font-bold text-green-600">+${income.toFixed(2)}</p>
+
+                    {/* Income */}
+                    <div className="rounded-2xl border border-white/5 bg-surface p-6 shadow-xl relative group transition-all hover:border-white/10">
+                        <div className="absolute top-6 right-6 p-2 rounded-lg bg-green-500/10 text-green-400">
+                            <div className="w-4 h-4 rounded-full bg-green-500/20 animate-pulse absolute inset-0 m-auto"></div>
+                            <svg className="w-4 h-4 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" /></svg>
+                        </div>
+                        <h3 className="mb-1 text-sm font-medium text-text-muted">Total Income</h3>
+                        <p className="text-3xl font-bold text-green-400">+${income.toFixed(2)}</p>
                     </div>
-                    <div className="rounded-xl bg-white p-6 shadow-md border border-gray-100">
-                        <h3 className="mb-2 text-gray-500 font-medium uppercase text-xs">Total Expenses</h3>
-                        <p className="text-3xl font-bold text-red-600">-${expense.toFixed(2)}</p>
+
+                    {/* Expenses */}
+                    <div className="rounded-2xl border border-white/5 bg-surface p-6 shadow-xl relative group transition-all hover:border-white/10">
+                        <div className="absolute top-6 right-6 p-2 rounded-lg bg-red-500/10 text-red-400">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 13l-5 5m0 0l-5-5m5 5V6" /></svg>
+                        </div>
+                        <h3 className="mb-1 text-sm font-medium text-text-muted">Total Expenses</h3>
+                        <p className="text-3xl font-bold text-red-400">-${expense.toFixed(2)}</p>
                     </div>
                 </div>
 
                 {/* Filters */}
-                <TransactionFilters
-                    currentMonth={currentMonth}
-                    currentYear={currentYear}
-                    selectedCategory={selectedCategory}
-                    availableCategories={availableCategories}
-                    onMonthChange={(e) => setCurrentMonth(e.target.value)}
-                    onYearChange={(e) => setCurrentYear(e.target.value)}
-                    onCategoryChange={(e) => setSelectedCategory(e.target.value)}
-                    onReset={handleResetFilters}
-                />
+                <div className="mb-8">
+                    <TransactionFilters
+                        currentMonth={currentMonth}
+                        currentYear={currentYear}
+                        selectedCategory={selectedCategory}
+                        availableCategories={availableCategories}
+                        onMonthChange={(e) => setCurrentMonth(e.target.value)}
+                        onYearChange={(e) => setCurrentYear(e.target.value)}
+                        onCategoryChange={(e) => setSelectedCategory(e.target.value)}
+                        onReset={handleResetFilters}
+                    />
+                </div>
 
-                {/* Charts Section */}
-                <div className="mb-8 grid gap-8 lg:grid-cols-3">
-                    <div className="lg:col-span-2">
-                        <h2 className="text-lg font-bold text-gray-800 mb-4">Financial Overview</h2>
-                        <FinancialCharts transactions={filteredTransactions} />
+                {/* Content Grid */}
+                <div className="grid gap-8 lg:grid-cols-3">
+                    {/* Left Column (Main Content) */}
+                    <div className="lg:col-span-2 space-y-8">
+                        {/* Charts */}
+                        <section className="space-y-4">
+                            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                                <span className="w-1 h-6 rounded-full bg-indigo-500"></span>
+                                Financial Overview
+                            </h2>
+                            <FinancialCharts transactions={filteredTransactions} />
+                        </section>
+
+                        {/* Recent Transactions */}
+                        <section className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                                    <span className="w-1 h-6 rounded-full bg-purple-500"></span>
+                                    Recent Transactions
+                                </h2>
+                                <button
+                                    onClick={() => exportTransactionsToCSV(filteredTransactions)}
+                                    className="flex items-center gap-2 rounded-lg border border-white/10 bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary hover:bg-surfaceHighlight hover:text-white hover:border-white/20 transition-all"
+                                >
+                                    <Download size={14} />
+                                    <span>Export CSV</span>
+                                </button>
+                            </div>
+
+                            {loading ? (
+                                <div className="flex justify-center items-center py-20 rounded-2xl border border-white/5 bg-surface">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+                                </div>
+                            ) : (
+                                <TransactionList
+                                    transactions={filteredTransactions}
+                                    onDelete={deleteTransaction}
+                                    onEdit={handleEditTransaction}
+                                />
+                            )}
+                        </section>
                     </div>
-                    <div>
+
+                    {/* Right Column (Sidebar) */}
+                    <div className="space-y-8">
                         <BudgetGoals transactions={filteredTransactions} />
                     </div>
                 </div>
-
-                {/* Recent Transactions */}
-                <div className="grid gap-8 lg:grid-cols-3">
-                    <div className="lg:col-span-2">
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-bold text-gray-800">Recent Transactions</h2>
-                            <button
-                                onClick={() => exportTransactionsToCSV(filteredTransactions)}
-                                className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition"
-                                title="Download as CSV"
-                            >
-                                <Download size={16} />
-                                <span className="hidden sm:inline">Export CSV</span>
-                            </button>
-                        </div>
-                        {/* Pass loading state if needed by the component, but we removed it. 
-                Wait, TransactionList might still want to know about loading? 
-                Actually, if useTransactions returns empty initially, the list is empty. 
-                Ideally Dashboard handles loading UI. 
-            */}
-                        {loading ? (
-                            <div className="text-center py-10 text-gray-500">Loading transactions...</div>
-                        ) : (
-                            <TransactionList
-                                transactions={filteredTransactions}
-                                onDelete={deleteTransaction}
-                                onEdit={handleEditTransaction}
-                            />
-                        )}
-
-                    </div>
-                    <div>
-                        {/* Optional sidebar content or tips could go here */}
-                    </div>
-                </div>
-            </div>
+            </main>
 
             {/* Floating Action Button */}
             <AddTransactionForm />

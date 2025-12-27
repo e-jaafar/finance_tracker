@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useBudgets } from "../hooks/useBudgets";
 import type { Transaction } from "../hooks/useTransactions";
-import { Check, Plus, Trash2, X } from "lucide-react";
+import { Check, Plus, Trash2, X, Target } from "lucide-react";
 
 export default function BudgetGoals({ transactions }: { transactions: Transaction[] }) {
     const { budgets, setBudget, removeBudget } = useBudgets();
@@ -20,9 +20,9 @@ export default function BudgetGoals({ transactions }: { transactions: Transactio
     };
 
     const getProgressColor = (percent: number) => {
-        if (percent >= 100) return "bg-red-500";
-        if (percent >= 80) return "bg-yellow-500";
-        return "bg-green-500";
+        if (percent >= 100) return "bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]";
+        if (percent >= 80) return "bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]";
+        return "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]";
     };
 
     async function handleAddBudget(e: React.FormEvent) {
@@ -38,23 +38,26 @@ export default function BudgetGoals({ transactions }: { transactions: Transactio
     const usedCategories = Array.from(new Set(transactions.map(t => t.category)));
 
     return (
-        <div className="rounded-xl bg-white p-6 shadow-md border border-gray-100 h-full">
+        <div className="rounded-2xl border border-white/5 bg-surface p-6 shadow-xl h-full">
             <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-bold text-gray-800">Budget Goals</h3>
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <Target className="text-indigo-500" size={20} />
+                    Budget Goals
+                </h3>
                 <button
                     onClick={() => setIsAdding(!isAdding)}
-                    className="flex items-center gap-1 rounded-lg bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-100 transition"
+                    className="flex items-center gap-1 rounded-lg bg-indigo-500/10 px-3 py-1.5 text-xs font-bold text-indigo-400 hover:bg-indigo-500/20 transition hover:text-indigo-300 border border-indigo-500/20"
                 >
-                    {isAdding ? <X size={16} /> : <Plus size={16} />}
+                    {isAdding ? <X size={14} /> : <Plus size={14} />}
                     {isAdding ? "Cancel" : "Add"}
                 </button>
             </div>
 
             {isAdding && (
-                <form onSubmit={handleAddBudget} className="mb-6 rounded-lg bg-gray-50 p-4 border border-gray-200">
-                    <div className="grid gap-4 md:grid-cols-3">
+                <form onSubmit={handleAddBudget} className="mb-6 rounded-xl bg-background p-4 border border-white/10 shadow-inner">
+                    <div className="grid gap-4">
                         <div>
-                            <label className="mb-1 block text-xs font-semibold text-gray-500">Category</label>
+                            <label className="mb-1.5 block text-xs font-bold text-text-muted uppercase tracking-wide">Category</label>
                             <input
                                 type="text"
                                 list="categories"
@@ -62,14 +65,14 @@ export default function BudgetGoals({ transactions }: { transactions: Transactio
                                 value={newCategory}
                                 onChange={(e) => setNewCategory(e.target.value)}
                                 required
-                                className="w-full rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
+                                className="w-full rounded-lg border border-white/10 bg-surface px-3 py-2 text-sm text-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                             />
                             <datalist id="categories">
                                 {usedCategories.map(cat => <option key={cat} value={cat} />)}
                             </datalist>
                         </div>
                         <div>
-                            <label className="mb-1 block text-xs font-semibold text-gray-500">Monthly Limit ($)</label>
+                            <label className="mb-1.5 block text-xs font-bold text-text-muted uppercase tracking-wide">Monthly Limit ($)</label>
                             <input
                                 type="number"
                                 step="0.01"
@@ -77,24 +80,28 @@ export default function BudgetGoals({ transactions }: { transactions: Transactio
                                 value={newLimit}
                                 onChange={(e) => setNewLimit(e.target.value)}
                                 required
-                                className="w-full rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500"
+                                className="w-full rounded-lg border border-white/10 bg-surface px-3 py-2 text-sm text-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                             />
                         </div>
-                        <div className="flex items-end">
-                            <button
-                                type="submit"
-                                className="flex w-full items-center justify-center gap-2 rounded bg-blue-600 py-2 font-bold text-white hover:bg-blue-700"
-                            >
-                                <Check size={16} /> Save
-                            </button>
-                        </div>
+                        <button
+                            type="submit"
+                            className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-bold text-white hover:bg-indigo-500 transition shadow-lg shadow-indigo-600/20"
+                        >
+                            <Check size={16} /> Save Budget
+                        </button>
                     </div>
                 </form>
             )}
 
-            <div className="space-y-6 overflow-y-auto max-h-[300px] pr-2">
+            <div className="space-y-6 overflow-y-auto max-h-[400px] pr-2 custom-scrollbar">
                 {budgets.length === 0 ? (
-                    <p className="text-center text-sm text-gray-500 py-4">No budgets set. Start by adding one!</p>
+                    <div className="text-center py-8">
+                        <div className="inline-block p-3 rounded-full bg-white/5 mb-3">
+                            <Target size={24} className="text-text-muted opacity-50" />
+                        </div>
+                        <p className="text-sm text-text-muted">No budgets set yet.</p>
+                        <p className="text-xs text-text-secondary mt-1">Set limits to track your spending.</p>
+                    </div>
                 ) : (
                     budgets.map((b) => {
                         const spent = getSpent(b.category);
@@ -102,35 +109,35 @@ export default function BudgetGoals({ transactions }: { transactions: Transactio
                         const isOver = spent > b.limit;
 
                         return (
-                            <div key={b.category}>
-                                <div className="flex items-center justify-between mb-1">
+                            <div key={b.category} className="group">
+                                <div className="flex items-center justify-between mb-2">
                                     <div className="flex items-center gap-2">
-                                        <span className="font-semibold text-gray-700">{b.category}</span>
+                                        <span className="font-semibold text-white text-sm">{b.category}</span>
                                         {isOver && (
-                                            <span className="rounded bg-red-100 px-2 py-0.5 text-[10px] font-bold uppercase text-red-600">
+                                            <span className="rounded bg-red-500/10 border border-red-500/20 px-1.5 py-0.5 text-[10px] font-bold uppercase text-red-400 tracking-wide">
                                                 Exceeded
                                             </span>
                                         )}
                                     </div>
-                                    <div className="flex items-center gap-4">
-                                        <span className="text-sm text-gray-600">
-                                            <span className={`font-bold ${isOver ? "text-red-600" : "text-gray-800"}`}>
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-xs text-text-secondary">
+                                            <span className={`font-bold ${isOver ? "text-red-400" : "text-white"}`}>
                                                 ${spent.toFixed(0)}
                                             </span>{" "}
-                                            / ${b.limit}
+                                            <span className="text-text-muted">/</span> ${b.limit}
                                         </span>
                                         <button
                                             onClick={() => removeBudget(b.category)}
-                                            className="text-gray-400 hover:text-red-500"
+                                            className="text-text-muted hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
                                             title="Remove"
                                         >
-                                            <Trash2 size={14} />
+                                            <Trash2 size={12} />
                                         </button>
                                     </div>
                                 </div>
-                                <div className="h-2.5 w-full rounded-full bg-gray-200 overflow-hidden">
+                                <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
                                     <div
-                                        className={`h-full rounded-full transition-all duration-500 ${getProgressColor(progress)}`}
+                                        className={`h-full rounded-full transition-all duration-700 ease-out ${getProgressColor(progress)}`}
                                         style={{ width: `${progress}%` }}
                                     />
                                 </div>

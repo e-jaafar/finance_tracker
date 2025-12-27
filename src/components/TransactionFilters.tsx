@@ -44,20 +44,22 @@ export default function TransactionFilters({
         currentYearNum - 2,
     ];
 
+    const selectClassName = "w-full appearance-none rounded-xl border border-white/10 bg-background px-4 py-2.5 text-sm text-text-primary focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all placeholder-text-muted";
+
     return (
-        <div className="mb-6 rounded-xl bg-white p-4 shadow-sm border border-gray-100">
-            <div className="mb-3 flex items-center gap-2 text-gray-700">
-                <Filter size={18} />
-                <h3 className="font-semibold">Filter Transactions</h3>
+        <div className="rounded-2xl border border-white/5 bg-surface p-5 shadow-lg">
+            <div className="mb-4 flex items-center gap-2 text-text-secondary">
+                <Filter size={16} />
+                <h3 className="text-xs font-bold uppercase tracking-wider">Filter Transactions</h3>
             </div>
 
-            <div className="grid gap-3 md:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-4">
                 {/* Month Filter */}
                 <div className="relative">
                     <select
                         value={currentMonth}
                         onChange={onMonthChange}
-                        className="w-full appearance-none rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className={selectClassName}
                     >
                         {months.map((m) => (
                             <option key={m.value} value={m.value}>
@@ -72,7 +74,7 @@ export default function TransactionFilters({
                     <select
                         value={currentYear}
                         onChange={onYearChange}
-                        className="w-full appearance-none rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className={selectClassName}
                     >
                         {years.map((y) => (
                             <option key={y} value={y}>
@@ -87,7 +89,7 @@ export default function TransactionFilters({
                     <select
                         value={selectedCategory}
                         onChange={onCategoryChange}
-                        className="w-full appearance-none rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className={selectClassName}
                     >
                         <option value="all">All Categories</option>
                         {availableCategories.map((cat) => (
@@ -101,7 +103,7 @@ export default function TransactionFilters({
                 {/* Reset Button */}
                 <button
                     onClick={onReset}
-                    className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+                    className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-text-secondary hover:bg-white/10 hover:text-white transition-all"
                 >
                     <X size={16} />
                     Reset

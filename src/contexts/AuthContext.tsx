@@ -5,7 +5,8 @@ import {
     signInWithEmailAndPassword,
     signOut,
     onAuthStateChanged,
-    
+    updateEmail,
+    updatePassword
 } from "firebase/auth";
 import type { User } from "firebase/auth";
 
@@ -14,6 +15,8 @@ interface AuthContextType {
     signup: (email: string, pass: string) => Promise<any>;
     login: (email: string, pass: string) => Promise<any>;
     logout: () => Promise<void>;
+    updateUserEmail: (email: string) => Promise<void>;
+    updateUserPassword: (password: string) => Promise<void>;
     loading: boolean;
 }
 
@@ -43,6 +46,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return signOut(auth);
     }
 
+    function updateUserEmail(email: string) {
+        if (!currentUser) throw new Error("No user logged in");
+        return updateEmail(currentUser, email);
+    }
+
+    function updateUserPassword(password: string) {
+        if (!currentUser) throw new Error("No user logged in");
+        return updatePassword(currentUser, password);
+    }
+
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             setCurrentUser(user);
@@ -57,6 +70,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signup,
         login,
         logout,
+        updateUserEmail,
+        updateUserPassword,
         loading,
     };
 

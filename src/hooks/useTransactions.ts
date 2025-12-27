@@ -8,9 +8,8 @@ import {
     deleteDoc,
     doc,
     serverTimestamp,
-    where
+    updateDoc
 } from "firebase/firestore";
-import type { WhereFilterOp } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -74,5 +73,13 @@ export function useTransactions() {
         await deleteDoc(doc(db, "users", currentUser.uid, "transactions", id));
     }
 
-    return { transactions, loading, addTransaction, deleteTransaction };
+    async function updateTransaction(
+        id: string,
+        updates: Partial<Omit<Transaction, "id" | "createdAt">>
+    ) {
+        if (!currentUser) return;
+        await updateDoc(doc(db, "users", currentUser.uid, "transactions", id), updates);
+    }
+
+    return { transactions, loading, addTransaction, deleteTransaction, updateTransaction };
 }

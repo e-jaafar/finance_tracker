@@ -1,13 +1,13 @@
-
 import type { Transaction } from "../hooks/useTransactions";
-import { Trash2, TrendingUp, TrendingDown } from "lucide-react";
+import { Trash2, TrendingUp, TrendingDown, Edit2 } from "lucide-react";
 
 interface TransactionListProps {
     transactions: Transaction[];
     onDelete: (id: string) => Promise<void>;
+    onEdit: (transaction: Transaction) => void;
 }
 
-export default function TransactionList({ transactions, onDelete }: TransactionListProps) {
+export default function TransactionList({ transactions, onDelete, onEdit }: TransactionListProps) {
 
 
 
@@ -46,9 +46,16 @@ export default function TransactionList({ transactions, onDelete }: TransactionL
                             {t.type === "income" ? "+" : "-"}${t.amount.toFixed(2)}
                         </span>
                         <button
+                            onClick={() => onEdit(t)}
+                            className="text-gray-400 hover:text-blue-500"
+                            title="Modifier"
+                        >
+                            <Edit2 size={18} />
+                        </button>
+                        <button
                             onClick={() => onDelete(t.id)}
                             className="text-gray-400 hover:text-red-500"
-                            title="Delete"
+                            title="Supprimer"
                         >
                             <Trash2 size={18} />
                         </button>

@@ -3,22 +3,11 @@ import { useBudgets } from "../hooks/useBudgets";
 import type { Transaction } from "../hooks/useTransactions";
 import { Check, Plus, Trash2, X } from "lucide-react";
 
-
-
 export default function BudgetGoals({ transactions }: { transactions: Transaction[] }) {
     const { budgets, setBudget, removeBudget } = useBudgets();
     const [isAdding, setIsAdding] = useState(false);
     const [newCategory, setNewCategory] = useState("");
     const [newLimit, setNewLimit] = useState("");
-
-    // Helper to calculate total spent in a category for the selected month/year
-    // Note: We use the passed transactions which should already be filtered by month/year in the Dashboard,
-    // BUT the dashboard filters might be set to "All", so we should be careful.
-    // Ideally, budgets are monthly. So we should compare against the transaction total for the *current real month* 
-    // or the *selected month* if the user is filtering?
-    // Let's assume budgets are monthly goals. If the user filters for "All time", showing monthly budget progress is confusing.
-    // So, let's calculate the "Spent" amount based on the *currently filtered view*.
-    // If the user selects "Janvier", we compare Janvier spending vs Budget.
 
     const getSpent = (category: string) => {
         return transactions
@@ -49,15 +38,15 @@ export default function BudgetGoals({ transactions }: { transactions: Transactio
     const usedCategories = Array.from(new Set(transactions.map(t => t.category)));
 
     return (
-        <div className="rounded-xl bg-white p-6 shadow-md border border-gray-100">
+        <div className="rounded-xl bg-white p-6 shadow-md border border-gray-100 h-full">
             <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-bold text-gray-800">Objectifs de Budget</h3>
+                <h3 className="text-lg font-bold text-gray-800">Budget Goals</h3>
                 <button
                     onClick={() => setIsAdding(!isAdding)}
                     className="flex items-center gap-1 rounded-lg bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-100 transition"
                 >
                     {isAdding ? <X size={16} /> : <Plus size={16} />}
-                    {isAdding ? "Annuler" : "Ajouter"}
+                    {isAdding ? "Cancel" : "Add"}
                 </button>
             </div>
 
@@ -65,11 +54,11 @@ export default function BudgetGoals({ transactions }: { transactions: Transactio
                 <form onSubmit={handleAddBudget} className="mb-6 rounded-lg bg-gray-50 p-4 border border-gray-200">
                     <div className="grid gap-4 md:grid-cols-3">
                         <div>
-                            <label className="mb-1 block text-xs font-semibold text-gray-500">Catégorie</label>
+                            <label className="mb-1 block text-xs font-semibold text-gray-500">Category</label>
                             <input
                                 type="text"
                                 list="categories"
-                                placeholder="Ex: Alimentation"
+                                placeholder="e.g. Food"
                                 value={newCategory}
                                 onChange={(e) => setNewCategory(e.target.value)}
                                 required
@@ -80,11 +69,11 @@ export default function BudgetGoals({ transactions }: { transactions: Transactio
                             </datalist>
                         </div>
                         <div>
-                            <label className="mb-1 block text-xs font-semibold text-gray-500">Limite Mensuelle (€)</label>
+                            <label className="mb-1 block text-xs font-semibold text-gray-500">Monthly Limit ($)</label>
                             <input
                                 type="number"
                                 step="0.01"
-                                placeholder="Ex: 500"
+                                placeholder="e.g. 500"
                                 value={newLimit}
                                 onChange={(e) => setNewLimit(e.target.value)}
                                 required
@@ -96,16 +85,16 @@ export default function BudgetGoals({ transactions }: { transactions: Transactio
                                 type="submit"
                                 className="flex w-full items-center justify-center gap-2 rounded bg-blue-600 py-2 font-bold text-white hover:bg-blue-700"
                             >
-                                <Check size={16} /> Enregistrer
+                                <Check size={16} /> Save
                             </button>
                         </div>
                     </div>
                 </form>
             )}
 
-            <div className="space-y-6">
+            <div className="space-y-6 overflow-y-auto max-h-[300px] pr-2">
                 {budgets.length === 0 ? (
-                    <p className="text-center text-sm text-gray-500 py-4">Aucun budget défini. Commencez par en ajouter un !</p>
+                    <p className="text-center text-sm text-gray-500 py-4">No budgets set. Start by adding one!</p>
                 ) : (
                     budgets.map((b) => {
                         const spent = getSpent(b.category);
@@ -119,21 +108,21 @@ export default function BudgetGoals({ transactions }: { transactions: Transactio
                                         <span className="font-semibold text-gray-700">{b.category}</span>
                                         {isOver && (
                                             <span className="rounded bg-red-100 px-2 py-0.5 text-[10px] font-bold uppercase text-red-600">
-                                                Dépassé
+                                                Exceeded
                                             </span>
                                         )}
                                     </div>
                                     <div className="flex items-center gap-4">
                                         <span className="text-sm text-gray-600">
                                             <span className={`font-bold ${isOver ? "text-red-600" : "text-gray-800"}`}>
-                                                {spent.toFixed(0)}€
+                                                ${spent.toFixed(0)}
                                             </span>{" "}
-                                            / {b.limit}€
+                                            / ${b.limit}
                                         </span>
                                         <button
                                             onClick={() => removeBudget(b.category)}
                                             className="text-gray-400 hover:text-red-500"
-                                            title="Supprimer"
+                                            title="Remove"
                                         >
                                             <Trash2 size={14} />
                                         </button>

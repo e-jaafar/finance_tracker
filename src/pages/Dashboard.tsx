@@ -7,7 +7,10 @@ import TransactionList from "../components/TransactionList";
 import FinancialCharts from "../components/FinancialCharts";
 import TransactionFilters from "../components/TransactionFilters";
 import BudgetGoals from "../components/BudgetGoals";
-import { LogOut, Wallet } from "lucide-react";
+import TransactionModal from "../components/TransactionModal";
+import type { Transaction } from "../hooks/useTransactions";
+import { exportTransactionsToCSV } from "../utils/exportCsv";
+import { LogOut, Wallet, User, Download } from "lucide-react";
 
 export default function Dashboard() {
     const [error, setError] = useState("");
@@ -19,6 +22,10 @@ export default function Dashboard() {
     const [currentMonth, setCurrentMonth] = useState("all");
     const [currentYear, setCurrentYear] = useState(new Date().getFullYear().toString());
     const [selectedCategory, setSelectedCategory] = useState("all");
+
+    // Edit State
+    const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     // Derive Available Categories
     const availableCategories = useMemo(() => {
@@ -58,6 +65,11 @@ export default function Dashboard() {
         setSelectedCategory("all");
     }
 
+    function handleEditTransaction(transaction: Transaction) {
+        setEditingTransaction(transaction);
+        setIsEditModalOpen(true);
+    }
+
     async function handleLogout() {
         setError("");
         try {
@@ -85,6 +97,13 @@ export default function Dashboard() {
                             <span className="text-sm text-gray-600 hidden md:inline">
                                 {currentUser?.email}
                             </span>
+                            <button
+                                onClick={() => navigate("/profile")}
+                                className="flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition"
+                            >
+                                <User size={16} />
+                                <span className="hidden md:inline">Profile</span>
+                            </button>
                             <button
                                 onClick={handleLogout}
                                 className="flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition"
@@ -148,6 +167,14 @@ export default function Dashboard() {
                     <div className="lg:col-span-2">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-lg font-bold text-gray-800">Recent Transactions</h2>
+                            <button
+                                onClick={() => exportTransactionsToCSV(filteredTransactions)}
+                                className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition"
+                                title="Download as CSV"
+                            >
+                                <Download size={16} />
+                                <span className="hidden sm:inline">Export CSV</span>
+                            </button>
                         </div>
                         {/* Pass loading state if needed by the component, but we removed it. 
                 Wait, TransactionList might still want to know about loading? 
@@ -157,7 +184,11 @@ export default function Dashboard() {
                         {loading ? (
                             <div className="text-center py-10 text-gray-500">Loading transactions...</div>
                         ) : (
-                            <TransactionList transactions={filteredTransactions} onDelete={deleteTransaction} />
+                            <TransactionList
+                                transactions={filteredTransactions}
+                                onDelete={deleteTransaction}
+                                onEdit={handleEditTransaction}
+                            />
                         )}
 
                     </div>
@@ -169,6 +200,16 @@ export default function Dashboard() {
 
             {/* Floating Action Button */}
             <AddTransactionForm />
+
+            {/* Edit Modal */}
+            <TransactionModal
+                isOpen={isEditModalOpen}
+                onClose={() => {
+                    setIsEditModalOpen(false);
+                    setEditingTransaction(null);
+                }}
+                existingTransaction={editingTransaction}
+            />
         </div>
     );
 }

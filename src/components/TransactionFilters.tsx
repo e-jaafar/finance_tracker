@@ -22,19 +22,19 @@ export default function TransactionFilters({
     onReset,
 }: TransactionFiltersProps) {
     const months = [
-        { value: "all", label: "Toute l'année" },
-        { value: "0", label: "Janvier" },
-        { value: "1", label: "Février" },
-        { value: "2", label: "Mars" },
-        { value: "3", label: "Avril" },
-        { value: "4", label: "Mai" },
-        { value: "5", label: "Juin" },
-        { value: "6", label: "Juillet" },
-        { value: "7", label: "Août" },
-        { value: "8", label: "Septembre" },
-        { value: "9", label: "Octobre" },
-        { value: "10", label: "Novembre" },
-        { value: "11", label: "Décembre" },
+        { value: "all", label: "All Months" },
+        { value: "0", label: "January" },
+        { value: "1", label: "February" },
+        { value: "2", label: "March" },
+        { value: "3", label: "April" },
+        { value: "4", label: "May" },
+        { value: "5", label: "June" },
+        { value: "6", label: "July" },
+        { value: "7", label: "August" },
+        { value: "8", label: "September" },
+        { value: "9", label: "October" },
+        { value: "10", label: "November" },
+        { value: "11", label: "December" },
     ];
 
     const currentYearNum = new Date().getFullYear();
@@ -48,7 +48,7 @@ export default function TransactionFilters({
         <div className="mb-6 rounded-xl bg-white p-4 shadow-sm border border-gray-100">
             <div className="mb-3 flex items-center gap-2 text-gray-700">
                 <Filter size={18} />
-                <h3 className="font-semibold">Filtrer les transactions</h3>
+                <h3 className="font-semibold">Filter Transactions</h3>
             </div>
 
             <div className="grid gap-3 md:grid-cols-4">
@@ -89,7 +89,7 @@ export default function TransactionFilters({
                         onChange={onCategoryChange}
                         className="w-full appearance-none rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     >
-                        <option value="all">Toutes les catégories</option>
+                        <option value="all">All Categories</option>
                         {availableCategories.map((cat) => (
                             <option key={cat} value={cat}>
                                 {cat}
@@ -104,7 +104,7 @@ export default function TransactionFilters({
                     className="flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
                 >
                     <X size={16} />
-                    Réinitialiser
+                    Reset
                 </button>
             </div>
         </div>

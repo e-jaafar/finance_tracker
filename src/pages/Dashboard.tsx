@@ -1,12 +1,14 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useTransactions } from "../hooks/useTransactions";
+import { useRecurring } from "../hooks/useRecurring";
 import AddTransactionForm from "../components/AddTransactionForm";
 import TransactionList from "../components/TransactionList";
 import FinancialCharts from "../components/FinancialCharts";
 import TransactionFilters from "../components/TransactionFilters";
 import BudgetGoals from "../components/BudgetGoals";
+import RecurringManager from "../components/RecurringManager";
 import TransactionModal from "../components/TransactionModal";
 import type { Transaction } from "../hooks/useTransactions";
 import { exportTransactionsToCSV } from "../utils/exportCsv";
@@ -16,7 +18,13 @@ export default function Dashboard() {
     const [error, setError] = useState("");
     const { currentUser, logout } = useAuth();
     const { transactions, deleteTransaction, loading } = useTransactions();
+    const { processDueTransactions } = useRecurring();
     const navigate = useNavigate();
+
+    // Process recurring transactions on mount
+    useEffect(() => {
+        processDueTransactions();
+    }, [processDueTransactions]);
 
     // Filter States
     const [currentMonth, setCurrentMonth] = useState("all");
@@ -217,6 +225,7 @@ export default function Dashboard() {
                     {/* Right Column (Sidebar) */}
                     <div className="space-y-8">
                         <BudgetGoals transactions={filteredTransactions} />
+                        <RecurringManager />
                     </div>
                 </div>
             </main>

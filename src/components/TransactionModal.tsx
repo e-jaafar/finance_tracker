@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useTransactions } from "../hooks/useTransactions";
-import { X, Check } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import { useCategories } from "../hooks/useCategories";
+import { X, Check, Repeat } from "lucide-react";
 import type { Transaction } from "../hooks/useTransactions";
 
 interface TransactionModalProps {
@@ -11,6 +13,8 @@ interface TransactionModalProps {
 
 export default function TransactionModal({ isOpen, onClose, existingTransaction }: TransactionModalProps) {
     const { addTransaction, updateTransaction } = useTransactions();
+    const { categories } = useCategories();
+    const { currentUser } = useAuth();
 
     // State
     const [type, setType] = useState<"income" | "expense">("expense");
@@ -18,6 +22,8 @@ export default function TransactionModal({ isOpen, onClose, existingTransaction 
     const [description, setDescription] = useState("");
     const [category, setCategory] = useState("");
     const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+    const [isRecurring, setIsRecurring] = useState(false);
+    const [frequency, setFrequency] = useState<"weekly" | "monthly" | "yearly">("monthly");
     const [loading, setLoading] = useState(false);
 
     // Populate form if editing
@@ -35,6 +41,8 @@ export default function TransactionModal({ isOpen, onClose, existingTransaction 
             setDescription("");
             setCategory("");
             setDate(new Date().toISOString().split("T")[0]);
+            setIsRecurring(false);
+            setFrequency("monthly");
         }
     }, [existingTransaction, isOpen]);
 
@@ -57,6 +65,20 @@ export default function TransactionModal({ isOpen, onClose, existingTransaction 
                 await updateTransaction(existingTransaction.id, transactionData);
             } else {
                 await addTransaction(transactionData);
+
+                if (isRecurring && currentUser) {
+                    const { addRecurringTransaction } = await import("../services/recurringService");
+                    const { Timestamp } = await import("firebase/firestore");
+
+                    await addRecurringTransaction(currentUser.uid, {
+                        amount: parseFloat(amount),
+                        category,
+                        description,
+                        type,
+                        frequency,
+                        startDate: Timestamp.fromDate(new Date(date))
+                    });
+                }
             }
             onClose();
         } catch (error) {
@@ -90,8 +112,8 @@ export default function TransactionModal({ isOpen, onClose, existingTransaction 
                             type="button"
                             onClick={() => setType("expense")}
                             className={`flex-1 rounded-xl py-3 text-sm font-bold transition-all ${type === "expense"
-                                    ? "bg-red-500/20 text-red-400 border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.2)]"
-                                    : "bg-surfaceHighlight text-text-muted hover:bg-white/5 hover:text-white border border-transparent"
+                                ? "bg-red-500/20 text-red-400 border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.2)]"
+                                : "bg-surfaceHighlight text-text-muted hover:bg-white/5 hover:text-white border border-transparent"
                                 }`}
                         >
                             Expense
@@ -100,8 +122,8 @@ export default function TransactionModal({ isOpen, onClose, existingTransaction 
                             type="button"
                             onClick={() => setType("income")}
                             className={`flex-1 rounded-xl py-3 text-sm font-bold transition-all ${type === "income"
-                                    ? "bg-green-500/20 text-green-400 border border-green-500/50 shadow-[0_0_15px_rgba(34,197,94,0.2)]"
-                                    : "bg-surfaceHighlight text-text-muted hover:bg-white/5 hover:text-white border border-transparent"
+                                ? "bg-green-500/20 text-green-400 border border-green-500/50 shadow-[0_0_15px_rgba(34,197,94,0.2)]"
+                                : "bg-surfaceHighlight text-text-muted hover:bg-white/5 hover:text-white border border-transparent"
                                 }`}
                         >
                             Income
@@ -133,6 +155,40 @@ export default function TransactionModal({ isOpen, onClose, existingTransaction 
                         </div>
                     </div>
 
+                    <div className="flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-white/5">
+                        <div className="flex items-center h-full">
+                            <input
+                                id="recurring"
+                                type="checkbox"
+                                checked={isRecurring}
+                                onChange={(e) => setIsRecurring(e.target.checked)}
+                                className="w-5 h-5 rounded border-gray-600 text-indigo-600 focus:ring-indigo-500 bg-[#16161d]"
+                            />
+                        </div>
+                        <div className="flex-1">
+                            <label htmlFor="recurring" className="font-medium text-white text-sm flex items-center gap-2 cursor-pointer select-none">
+                                <Repeat size={16} className="text-slate-400" />
+                                Recurring Transaction?
+                            </label>
+                            {isRecurring && (
+                                <p className="text-xs text-slate-400 mt-1">Will be automatically added every period.</p>
+                            )}
+                        </div>
+                        {isRecurring && (
+                            <div>
+                                <select
+                                    value={frequency}
+                                    onChange={(e) => setFrequency(e.target.value as any)}
+                                    className="bg-[#16161d] border border-white/10 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 outline-none"
+                                >
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                    <option value="yearly">Yearly</option>
+                                </select>
+                            </div>
+                        )}
+                    </div>
+
                     <div>
                         <label className={labelClassName}>Description</label>
                         <input
@@ -157,12 +213,9 @@ export default function TransactionModal({ isOpen, onClose, existingTransaction 
                             placeholder="e.g. Food"
                         />
                         <datalist id="category-suggestions">
-                            <option value="Food" />
-                            <option value="Transport" />
-                            <option value="Utilities" />
-                            <option value="Entertainment" />
-                            <option value="Salary" />
-                            <option value="Health" />
+                            {categories.map((cat) => (
+                                <option key={cat.id} value={cat.name} />
+                            ))}
                         </datalist>
                     </div>
 

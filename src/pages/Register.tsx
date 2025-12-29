@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Lock, Mail, ChevronRight, UserPlus } from "lucide-react";
@@ -7,7 +7,6 @@ import { getAuthErrorMessage } from "../utils/authErrors";
 export default function Register() {
     const emailRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
-    const passwordConfirmRef = useRef<HTMLInputElement>(null);
     const passwordConfirmRef = useRef<HTMLInputElement>(null);
     const { signup, signInWithGoogle } = useAuth();
     const [error, setError] = useState("");
@@ -76,6 +75,7 @@ export default function Register() {
                                     type="email"
                                     ref={emailRef}
                                     required
+                                    autoComplete="email"
                                     className="w-full pl-11 pr-4 py-3 bg-[#16161d] border border-white/10 rounded-lg text-white placeholder-slate-600 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 outline-none transition-all font-medium text-sm"
                                     placeholder="your@email.com"
                                 />
@@ -90,6 +90,7 @@ export default function Register() {
                                     type="password"
                                     ref={passwordRef}
                                     required
+                                    autoComplete="new-password"
                                     className="w-full pl-11 pr-4 py-3 bg-[#16161d] border border-white/10 rounded-lg text-white placeholder-slate-600 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 outline-none transition-all font-medium text-sm"
                                     placeholder="••••••••"
                                 />
@@ -104,6 +105,7 @@ export default function Register() {
                                     type="password"
                                     ref={passwordConfirmRef}
                                     required
+                                    autoComplete="new-password"
                                     className="w-full pl-11 pr-4 py-3 bg-[#16161d] border border-white/10 rounded-lg text-white placeholder-slate-600 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 outline-none transition-all font-medium text-sm"
                                     placeholder="••••••••"
                                 />

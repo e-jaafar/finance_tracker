@@ -11,6 +11,9 @@ import {
 } from "chart.js";
 import { Bar, Doughnut } from "react-chartjs-2";
 import type { Transaction } from "../hooks/useTransactions";
+import { useCategories } from "../hooks/useCategories";
+import EmptyState from "./EmptyState";
+import { PieChart } from "lucide-react";
 
 ChartJS.register(
     CategoryScale,
@@ -31,6 +34,8 @@ interface FinancialChartsProps {
 }
 
 export default function FinancialCharts({ transactions }: FinancialChartsProps) {
+
+    const { categories } = useCategories();
 
     const { incomeTotal, expenseTotal, expenseByCategory } = useMemo(() => {
         let income = 0;
@@ -53,6 +58,27 @@ export default function FinancialCharts({ transactions }: FinancialChartsProps) 
         };
     }, [transactions]);
 
+    // Helper to get color for a category name
+    const getCategoryColor = (name: string) => {
+        const cat = categories.find(c => c.name === name);
+        return cat ? cat.color : "#64748b"; // Default slate if not found
+    };
+
+    if (transactions.length === 0) {
+        return (
+            <div className="rounded-2xl border border-white/5 bg-surface p-6 shadow-lg">
+                <h3 className="mb-6 text-center text-sm font-bold uppercase tracking-wider text-text-muted">
+                    Financial Overview
+                </h3>
+                <EmptyState
+                    icon={PieChart}
+                    title="No data to visualize"
+                    description="Add some transactions to see your personalized financial insights and breakdowns."
+                />
+            </div>
+        );
+    }
+
     const barData = {
         labels: ["Income", "Expenses"],
         datasets: [
@@ -67,20 +93,14 @@ export default function FinancialCharts({ transactions }: FinancialChartsProps) 
         ],
     };
 
+    const categoryNames = Object.keys(expenseByCategory);
     const doughnutData = {
-        labels: Object.keys(expenseByCategory),
+        labels: categoryNames,
         datasets: [
             {
                 label: "Expenses by Category",
                 data: Object.values(expenseByCategory),
-                backgroundColor: [
-                    "rgba(99, 102, 241, 0.8)", // Indigo
-                    "rgba(236, 72, 153, 0.8)", // Pink
-                    "rgba(245, 158, 11, 0.8)", // Amber
-                    "rgba(16, 185, 129, 0.8)", // Emerald
-                    "rgba(139, 92, 246, 0.8)", // Violet
-                    "rgba(59, 130, 246, 0.8)", // Blue
-                ],
+                backgroundColor: categoryNames.map(name => getCategoryColor(name)),
                 borderColor: '#1e1e26', // Match surface background for unified look
                 borderWidth: 2,
             },

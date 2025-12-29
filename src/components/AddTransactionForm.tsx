@@ -9,9 +9,9 @@ export default function AddTransactionForm() {
         <>
             <button
                 onClick={() => setIsOpen(true)}
-                className="flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 font-bold text-white shadow-lg transition hover:bg-blue-700 hover:shadow-xl fixed bottom-8 right-8 md:static md:w-auto z-40"
+                className="flex items-center gap-2 rounded-full bg-indigo-600 px-6 py-3 font-bold text-white shadow-lg shadow-indigo-600/30 transition-all hover:bg-indigo-500 hover:scale-105 hover:shadow-indigo-600/50 fixed bottom-8 right-8 z-50"
             >
-                <PlusCircle size={20} /> Add
+                <PlusCircle size={20} /> Add Transaction
             </button>
 
             <TransactionModal

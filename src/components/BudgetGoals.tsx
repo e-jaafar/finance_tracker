@@ -2,9 +2,12 @@ import React, { useState } from "react";
 import { useBudgets } from "../hooks/useBudgets";
 import type { Transaction } from "../hooks/useTransactions";
 import { Check, Plus, Trash2, X, Target } from "lucide-react";
+import EmptyState from "./EmptyState";
+import { useCategories } from "../hooks/useCategories";
 
 export default function BudgetGoals({ transactions }: { transactions: Transaction[] }) {
     const { budgets, setBudget, removeBudget } = useBudgets();
+    const { categories } = useCategories();
     const [isAdding, setIsAdding] = useState(false);
     const [newCategory, setNewCategory] = useState("");
     const [newLimit, setNewLimit] = useState("");
@@ -34,12 +37,9 @@ export default function BudgetGoals({ transactions }: { transactions: Transactio
         setNewLimit("");
     }
 
-    // Get used categories from transactions to suggest auto-completion
-    const usedCategories = Array.from(new Set(transactions.map(t => t.category)));
-
     return (
-        <div className="rounded-2xl border border-white/5 bg-surface p-6 shadow-xl h-full">
-            <div className="flex items-center justify-between mb-6">
+        <div className="rounded-2xl border border-white/5 bg-surface p-6 shadow-xl h-full flex flex-col">
+            <div className="flex items-center justify-between mb-6 shrink-0">
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
                     <Target className="text-indigo-500" size={20} />
                     Budget Goals
@@ -54,7 +54,7 @@ export default function BudgetGoals({ transactions }: { transactions: Transactio
             </div>
 
             {isAdding && (
-                <form onSubmit={handleAddBudget} className="mb-6 rounded-xl bg-background p-4 border border-white/10 shadow-inner">
+                <form onSubmit={handleAddBudget} className="mb-6 rounded-xl bg-background p-4 border border-white/10 shadow-inner shrink-0">
                     <div className="grid gap-4">
                         <div>
                             <label className="mb-1.5 block text-xs font-bold text-text-muted uppercase tracking-wide">Category</label>
@@ -68,7 +68,7 @@ export default function BudgetGoals({ transactions }: { transactions: Transactio
                                 className="w-full rounded-lg border border-white/10 bg-surface px-3 py-2 text-sm text-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                             />
                             <datalist id="categories">
-                                {usedCategories.map(cat => <option key={cat} value={cat} />)}
+                                {categories.map(cat => <option key={cat.id} value={cat.name} />)}
                             </datalist>
                         </div>
                         <div>
@@ -93,15 +93,15 @@ export default function BudgetGoals({ transactions }: { transactions: Transactio
                 </form>
             )}
 
-            <div className="space-y-6 overflow-y-auto max-h-[400px] pr-2 custom-scrollbar">
+            <div className="space-y-6 overflow-y-auto pr-2 custom-scrollbar flex-1 min-h-[200px]">
                 {budgets.length === 0 ? (
-                    <div className="text-center py-8">
-                        <div className="inline-block p-3 rounded-full bg-white/5 mb-3">
-                            <Target size={24} className="text-text-muted opacity-50" />
-                        </div>
-                        <p className="text-sm text-text-muted">No budgets set yet.</p>
-                        <p className="text-xs text-text-secondary mt-1">Set limits to track your spending.</p>
-                    </div>
+                    <EmptyState
+                        icon={Target}
+                        title="No budgets set"
+                        description="Set monthly limits to keep track of your spending per category."
+                        actionLabel="Set Budget"
+                        onAction={() => setIsAdding(true)}
+                    />
                 ) : (
                     budgets.map((b) => {
                         const spent = getSpent(b.category);

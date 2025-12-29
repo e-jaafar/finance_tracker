@@ -1,7 +1,8 @@
 import React, { useRef, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { User, Mail, Lock, AlertCircle, Check, ArrowLeft, Shield } from "lucide-react";
+import { User, Mail, Lock, AlertCircle, Check, ArrowLeft, Shield, Tag } from "lucide-react";
+import CategoryManager from "../components/CategoryManager";
 import { getAuthErrorMessage } from "../utils/authErrors";
 
 export default function Profile() {
@@ -137,6 +138,14 @@ export default function Profile() {
                                         <Lock className={iconClassName} size={18} />
                                     </div>
                                 </div>
+                            </div>
+
+                            <div className="pt-6 border-t border-white/5">
+                                <h3 className="text-sm font-bold text-white mb-6 flex items-center gap-2">
+                                    <Tag size={16} className="text-slate-400" />
+                                    Category Management
+                                </h3>
+                                <CategoryManager />
                             </div>
 
                             <div className="pt-4">

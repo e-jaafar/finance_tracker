@@ -19,7 +19,8 @@ export default function Login() {
             await signInWithGoogle();
             navigate("/dashboard");
         } catch (err: any) {
-            setError(getAuthErrorMessage(err.code));
+            console.error(err);
+            setError(getAuthErrorMessage(err));
         }
         setLoading(false);
     }

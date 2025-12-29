@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { ArrowRight, CheckCircle2, PieChart, Shield, TrendingUp, Wallet, Layout, ChevronRight } from "lucide-react";
+import { ArrowRight, PieChart, Shield, TrendingUp, Wallet, Layout } from "lucide-react";
 
 export default function Landing() {
     const navigate = useNavigate();

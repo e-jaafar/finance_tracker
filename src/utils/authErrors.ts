@@ -1,4 +1,6 @@
-export function getAuthErrorMessage(errorCode: string): string {
+export function getAuthErrorMessage(error: any): string {
+    const errorCode = error?.code;
+
     switch (errorCode) {
         case "auth/invalid-email":
             return "L'adresse email n'est pas valide.";
@@ -15,11 +17,12 @@ export function getAuthErrorMessage(errorCode: string): string {
             return "Le mot de passe doit contenir au moins 6 caractères.";
         case "auth/operation-not-allowed":
             return "La connexion par email/mot de passe n'est pas activée.";
-        case "auth/too-many-requests":
-            return "Trop de tentatives échouées. Veuillez réessayer plus tard.";
-        case "auth/network-request-failed":
-            return "Erreur réseau. Vérifiez votre connexion internet.";
+        case "auth/popup-closed-by-user":
+            return "La fenêtre de connexion a été fermée.";
+        case "auth/cancelled-popup-request":
+            return "Une seule demande de fenêtre contextuelle est autorisée à la fois.";
         default:
-            return "Une erreur inconnue est survenue (" + errorCode + ").";
+            console.error("Auth Error:", error);
+            return error?.message || "Une erreur inconnue est survenue.";
     }
 }

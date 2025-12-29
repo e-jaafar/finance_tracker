@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, setDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "./AuthContext";
 
@@ -11,15 +11,15 @@ interface CurrencyInfo {
     name: string;
 }
 
-export const CURRENCIES: CurrencyInfo[] = [
-    { code: "USD", symbol: "$", name: "US Dollar" },
-    { code: "EUR", symbol: "€", name: "Euro" },
-    { code: "GBP", symbol: "£", name: "British Pound" },
-    { code: "MAD", symbol: "DH", name: "Moroccan Dirham" },
-    { code: "CAD", symbol: "C$", name: "Canadian Dollar" },
-    { code: "CHF", symbol: "CHF", name: "Swiss Franc" },
-    { code: "JPY", symbol: "¥", name: "Japanese Yen" },
-];
+export const CURRENCIES: Record<Currency, CurrencyInfo> = {
+    USD: { code: "USD", symbol: "$", name: "US Dollar" },
+    EUR: { code: "EUR", symbol: "€", name: "Euro" },
+    GBP: { code: "GBP", symbol: "£", name: "British Pound" },
+    MAD: { code: "MAD", symbol: "DH", name: "Moroccan Dirham" },
+    CAD: { code: "CAD", symbol: "C$", name: "Canadian Dollar" },
+    CHF: { code: "CHF", symbol: "CHF", name: "Swiss Franc" },
+    JPY: { code: "JPY", symbol: "¥", name: "Japanese Yen" },
+};
 
 interface CurrencyContextType {
     currency: Currency;
@@ -44,49 +44,51 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(true);
     const { currentUser } = useAuth();
 
-    // Load user's preferred currency from Firestore
+    // Load user's preferred currency from Firestore using realtime listener
     useEffect(() => {
-        async function loadCurrency() {
-            if (!currentUser) {
-                setCurrencyState("USD");
-                setLoading(false);
-                return;
-            }
-
-            try {
-                const userDocRef = doc(db, "users", currentUser.uid, "settings", "preferences");
-                const userDoc = await getDoc(userDocRef);
-                
-                if (userDoc.exists() && userDoc.data().currency) {
-                    setCurrencyState(userDoc.data().currency as Currency);
-                }
-            } catch (error) {
-                console.error("Error loading currency preference:", error);
-            }
+        if (!currentUser) {
+            setCurrencyState("USD");
             setLoading(false);
+            return;
         }
 
-        loadCurrency();
+        const userDocRef = doc(db, "users", currentUser.uid, "settings", "preferences");
+        
+        const unsubscribe = onSnapshot(
+            userDocRef,
+            (docSnap) => {
+                if (docSnap.exists() && docSnap.data().currency) {
+                    setCurrencyState(docSnap.data().currency as Currency);
+                }
+                setLoading(false);
+            },
+            (error) => {
+                console.warn("Currency preference unavailable, using default:", error.message);
+                setLoading(false);
+            }
+        );
+
+        return unsubscribe;
     }, [currentUser]);
 
     // Save currency preference to Firestore
     async function setCurrency(newCurrency: Currency) {
+        setCurrencyState(newCurrency); // Update locally first for instant feedback
+        
         if (!currentUser) return;
 
         try {
             const userDocRef = doc(db, "users", currentUser.uid, "settings", "preferences");
             await setDoc(userDocRef, { currency: newCurrency }, { merge: true });
-            setCurrencyState(newCurrency);
         } catch (error) {
-            console.error("Error saving currency preference:", error);
-            throw new Error("Failed to save currency preference");
+            console.warn("Could not save currency preference:", error);
+            // Don't throw - local state is already updated
         }
     }
 
-    const currencyInfo = CURRENCIES.find(c => c.code === currency) || CURRENCIES[0];
+    const currencyInfo = CURRENCIES[currency] || CURRENCIES.USD;
 
     function formatAmount(amount: number): string {
-        // Format based on currency
         const formatter = new Intl.NumberFormat(undefined, {
             style: "currency",
             currency: currency,

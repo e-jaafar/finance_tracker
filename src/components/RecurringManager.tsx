@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useRecurring } from "../hooks/useRecurring";
 import { useCategories } from "../hooks/useCategories";
+import { useCurrency } from "../contexts/CurrencyContext";
 import {
     Plus,
     Trash2,
@@ -31,6 +32,7 @@ export default function RecurringManager() {
     } = useRecurring();
 
     const { categories } = useCategories();
+    const { formatAmount } = useCurrency();
 
     const [isAdding, setIsAdding] = useState(false);
     const [submitting, setSubmitting] = useState(false);
@@ -275,7 +277,7 @@ export default function RecurringManager() {
 
                                 <div className="flex items-center gap-3">
                                     <span className={`font-bold text-sm ${item.type === "income" ? "text-green-400" : "text-red-400"}`}>
-                                        {item.type === "income" ? "+" : "-"}${item.amount.toFixed(2)}
+                                        {item.type === "income" ? "+" : "-"}{formatAmount(item.amount)}
                                     </span>
 
                                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

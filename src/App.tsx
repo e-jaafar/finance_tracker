@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { ToastProvider } from "./contexts/ToastContext";
+import { CurrencyProvider } from "./contexts/CurrencyContext";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -46,48 +48,52 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <Routes>
-          {/* Public Landing Page */}
-          <Route path="/" element={<Landing />} />
+        <CurrencyProvider>
+          <ToastProvider>
+            <Routes>
+              {/* Public Landing Page */}
+              <Route path="/" element={<Landing />} />
 
-          {/* Protected Dashboard */}
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            }
-          />
+              {/* Protected Dashboard */}
+              <Route
+                path="/dashboard"
+                element={
+                  <PrivateRoute>
+                    <Dashboard />
+                  </PrivateRoute>
+                }
+              />
 
-          {/* Profile Page */}
-          <Route
-            path="/profile"
-            element={
-              <PrivateRoute>
-                <Profile />
-              </PrivateRoute>
-            }
-          />
+              {/* Profile Page */}
+              <Route
+                path="/profile"
+                element={
+                  <PrivateRoute>
+                    <Profile />
+                  </PrivateRoute>
+                }
+              />
 
-          {/* Auth Routes (Redirect to dashboard if already logged in) */}
-          <Route
-            path="/login"
-            element={
-              <PublicOnlyRoute>
-                <Login />
-              </PublicOnlyRoute>
-            }
-          />
-          <Route
-            path="/register"
-            element={
-              <PublicOnlyRoute>
-                <Register />
-              </PublicOnlyRoute>
-            }
-          />
-        </Routes>
+              {/* Auth Routes (Redirect to dashboard if already logged in) */}
+              <Route
+                path="/login"
+                element={
+                  <PublicOnlyRoute>
+                    <Login />
+                  </PublicOnlyRoute>
+                }
+              />
+              <Route
+                path="/register"
+                element={
+                  <PublicOnlyRoute>
+                    <Register />
+                  </PublicOnlyRoute>
+                }
+              />
+            </Routes>
+          </ToastProvider>
+        </CurrencyProvider>
       </AuthProvider>
     </Router>
   );

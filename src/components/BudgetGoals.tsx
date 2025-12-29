@@ -4,10 +4,12 @@ import type { Transaction } from "../hooks/useTransactions";
 import { Check, Plus, Trash2, X, Target } from "lucide-react";
 import EmptyState from "./EmptyState";
 import { useCategories } from "../hooks/useCategories";
+import { useCurrency } from "../contexts/CurrencyContext";
 
 export default function BudgetGoals({ transactions }: { transactions: Transaction[] }) {
     const { budgets, setBudget, removeBudget } = useBudgets();
     const { categories } = useCategories();
+    const { formatAmount, currencyInfo } = useCurrency();
     const [isAdding, setIsAdding] = useState(false);
     const [newCategory, setNewCategory] = useState("");
     const [newLimit, setNewLimit] = useState("");
@@ -72,7 +74,7 @@ export default function BudgetGoals({ transactions }: { transactions: Transactio
                             </datalist>
                         </div>
                         <div>
-                            <label className="mb-1.5 block text-xs font-bold text-text-muted uppercase tracking-wide">Monthly Limit ($)</label>
+                            <label className="mb-1.5 block text-xs font-bold text-text-muted uppercase tracking-wide">Monthly Limit ({currencyInfo.symbol})</label>
                             <input
                                 type="number"
                                 step="0.01"
@@ -122,9 +124,9 @@ export default function BudgetGoals({ transactions }: { transactions: Transactio
                                     <div className="flex items-center gap-3">
                                         <span className="text-xs text-text-secondary">
                                             <span className={`font-bold ${isOver ? "text-red-400" : "text-white"}`}>
-                                                ${spent.toFixed(0)}
+                                                {formatAmount(spent)}
                                             </span>{" "}
-                                            <span className="text-text-muted">/</span> ${b.limit}
+                                            <span className="text-text-muted">/</span> {formatAmount(b.limit)}
                                         </span>
                                         <button
                                             onClick={() => removeBudget(b.category)}

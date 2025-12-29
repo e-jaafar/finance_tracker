@@ -12,6 +12,7 @@ import {
 import { Bar, Doughnut } from "react-chartjs-2";
 import type { Transaction } from "../hooks/useTransactions";
 import { useCategories } from "../hooks/useCategories";
+import { useCurrency } from "../contexts/CurrencyContext";
 import EmptyState from "./EmptyState";
 import { PieChart } from "lucide-react";
 
@@ -36,6 +37,7 @@ interface FinancialChartsProps {
 export default function FinancialCharts({ transactions }: FinancialChartsProps) {
 
     const { categories } = useCategories();
+    const { currencyInfo } = useCurrency();
 
     const { incomeTotal, expenseTotal, expenseByCategory } = useMemo(() => {
         let income = 0;
@@ -83,7 +85,7 @@ export default function FinancialCharts({ transactions }: FinancialChartsProps) 
         labels: ["Income", "Expenses"],
         datasets: [
             {
-                label: "Amount ($)",
+                label: `Amount (${currencyInfo.symbol})`,
                 data: [incomeTotal, expenseTotal],
                 backgroundColor: ["rgba(34, 197, 94, 0.8)", "rgba(239, 68, 68, 0.8)"], // More opaque for dark mode
                 borderColor: ["rgb(34, 197, 94)", "rgb(239, 68, 68)"],

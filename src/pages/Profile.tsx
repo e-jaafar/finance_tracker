@@ -1,7 +1,9 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { useCurrency, CURRENCIES } from "../contexts/CurrencyContext";
+import { useToast } from "../contexts/ToastContext";
 import { useNavigate } from "react-router-dom";
-import { User, Mail, Lock, AlertCircle, Check, ArrowLeft, Shield, Tag } from "lucide-react";
+import { User, Mail, Lock, AlertCircle, Check, ArrowLeft, Shield, Tag, Coins } from "lucide-react";
 import CategoryManager from "../components/CategoryManager";
 import { getAuthErrorMessage } from "../utils/authErrors";
 
@@ -10,10 +12,21 @@ export default function Profile() {
     const passwordRef = useRef<HTMLInputElement>(null);
     const passwordConfirmRef = useRef<HTMLInputElement>(null);
     const { currentUser, updateUserEmail, updateUserPassword } = useAuth();
+    const { currency, setCurrency } = useCurrency();
+    const { showToast } = useToast();
     const [error, setError] = useState("");
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+
+    async function handleCurrencyChange(newCurrency: string) {
+        try {
+            await setCurrency(newCurrency as any);
+            showToast(`Currency changed to ${newCurrency}`, "success");
+        } catch {
+            showToast("Failed to change currency", "error");
+        }
+    }
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -137,6 +150,27 @@ export default function Profile() {
                                         />
                                         <Lock className={iconClassName} size={18} />
                                     </div>
+                                </div>
+                            </div>
+
+                            <div className="pt-6 border-t border-white/5">
+                                <h3 className="text-sm font-bold text-white mb-6 flex items-center gap-2">
+                                    <Coins size={16} className="text-slate-400" />
+                                    Currency Preferences
+                                </h3>
+                                <div className="relative">
+                                    <label className={labelClassName}>Display Currency</label>
+                                    <select
+                                        value={currency}
+                                        onChange={(e) => handleCurrencyChange(e.target.value)}
+                                        className="w-full rounded-lg border border-white/10 bg-[#16161d] px-4 py-3 text-white outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 transition-all appearance-none cursor-pointer"
+                                    >
+                                        {Object.entries(CURRENCIES).map(([code, info]) => (
+                                            <option key={code} value={code}>
+                                                {info.symbol} - {info.name} ({code})
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
 

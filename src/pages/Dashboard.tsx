@@ -1,10 +1,12 @@
 import { useState, useMemo, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "../contexts/ToastContext";
+import { useCurrency } from "../contexts/CurrencyContext";
 import { useNavigate } from "react-router-dom";
 import { useTransactions } from "../hooks/useTransactions";
 import { useRecurring } from "../hooks/useRecurring";
 import AddTransactionForm from "../components/AddTransactionForm";
-import TransactionList from "../components/TransactionList";
+import TransactionList, { TransactionListSkeleton } from "../components/TransactionList";
 import FinancialCharts from "../components/FinancialCharts";
 import TransactionFilters from "../components/TransactionFilters";
 import BudgetGoals from "../components/BudgetGoals";
@@ -17,6 +19,8 @@ import { LogOut, Wallet, User, Download } from "lucide-react";
 export default function Dashboard() {
     const [error, setError] = useState("");
     const { currentUser, logout } = useAuth();
+    const { showToast } = useToast();
+    const { formatAmount } = useCurrency();
     const { transactions, deleteTransaction, loading } = useTransactions();
     const { processDueTransactions } = useRecurring();
     const navigate = useNavigate();
@@ -76,6 +80,15 @@ export default function Dashboard() {
     function handleEditTransaction(transaction: Transaction) {
         setEditingTransaction(transaction);
         setIsEditModalOpen(true);
+    }
+
+    async function handleDeleteTransaction(id: string) {
+        try {
+            await deleteTransaction(id);
+            showToast("Transaction deleted successfully", "success");
+        } catch {
+            showToast("Failed to delete transaction", "error");
+        }
     }
 
     async function handleLogout() {
@@ -142,7 +155,7 @@ export default function Dashboard() {
                     <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-800 to-slate-900 p-6 text-white shadow-2xl">
                         <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-white/5 blur-2xl"></div>
                         <h3 className="mb-1 text-sm font-medium text-slate-400">Total Balance</h3>
-                        <p className="text-4xl font-extrabold tracking-tight text-white">${balance.toFixed(2)}</p>
+                        <p className="text-4xl font-extrabold tracking-tight text-white">{formatAmount(balance)}</p>
                     </div>
 
                     {/* Income */}
@@ -152,7 +165,7 @@ export default function Dashboard() {
                             <svg className="w-4 h-4 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" /></svg>
                         </div>
                         <h3 className="mb-1 text-sm font-medium text-text-muted">Total Income</h3>
-                        <p className="text-3xl font-bold text-green-400">+${income.toFixed(2)}</p>
+                        <p className="text-3xl font-bold text-green-400">+{formatAmount(income)}</p>
                     </div>
 
                     {/* Expenses */}
@@ -161,7 +174,7 @@ export default function Dashboard() {
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 13l-5 5m0 0l-5-5m5 5V6" /></svg>
                         </div>
                         <h3 className="mb-1 text-sm font-medium text-text-muted">Total Expenses</h3>
-                        <p className="text-3xl font-bold text-red-400">-${expense.toFixed(2)}</p>
+                        <p className="text-3xl font-bold text-red-400">-{formatAmount(expense)}</p>
                     </div>
                 </div>
 
@@ -209,13 +222,11 @@ export default function Dashboard() {
                             </div>
 
                             {loading ? (
-                                <div className="flex justify-center items-center py-20 rounded-2xl border border-white/5 bg-surface">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
-                                </div>
+                                <TransactionListSkeleton />
                             ) : (
                                 <TransactionList
                                     transactions={filteredTransactions}
-                                    onDelete={deleteTransaction}
+                                    onDelete={handleDeleteTransaction}
                                     onEdit={handleEditTransaction}
                                 />
                             )}

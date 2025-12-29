@@ -52,15 +52,15 @@ export default function TransactionModal({ isOpen, onClose, existingTransaction 
         e.preventDefault();
         setLoading(true);
 
-        try {
-            const transactionData = {
-                type,
-                amount: parseFloat(amount),
-                description,
-                category,
-                date,
-            };
+        const transactionData = {
+            type,
+            amount: parseFloat(amount),
+            description,
+            category,
+            date,
+        };
 
+        try {
             if (existingTransaction) {
                 await updateTransaction(existingTransaction.id, transactionData);
             } else {
@@ -80,11 +80,12 @@ export default function TransactionModal({ isOpen, onClose, existingTransaction 
                     });
                 }
             }
-            onClose();
         } catch (error) {
-            console.error(error);
+            console.warn("Transaction may be saved offline:", error);
+        } finally {
+            setLoading(false);
+            onClose();
         }
-        setLoading(false);
     }
 
     const inputClassName = "w-full rounded-xl border border-white/10 bg-background px-4 py-3 text-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all placeholder-text-muted";
@@ -203,20 +204,21 @@ export default function TransactionModal({ isOpen, onClose, existingTransaction 
 
                     <div>
                         <label className={labelClassName}>Category</label>
-                        <input
-                            type="text"
-                            list="category-suggestions"
+                        <select
                             required
                             value={category}
                             onChange={(e) => setCategory(e.target.value)}
                             className={inputClassName}
-                            placeholder="e.g. Food"
-                        />
-                        <datalist id="category-suggestions">
-                            {categories.map((cat) => (
-                                <option key={cat.id} value={cat.name} />
-                            ))}
-                        </datalist>
+                        >
+                            <option value="">Select a category</option>
+                            {categories
+                                .filter((cat) => cat.type === type || cat.type === "both")
+                                .map((cat) => (
+                                    <option key={cat.id} value={cat.name}>
+                                        {cat.name}
+                                    </option>
+                                ))}
+                        </select>
                     </div>
 
                     <div className="pt-4">

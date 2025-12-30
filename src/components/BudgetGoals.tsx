@@ -14,10 +14,21 @@ export default function BudgetGoals({ transactions }: { transactions: Transactio
     const [newCategory, setNewCategory] = useState("");
     const [newLimit, setNewLimit] = useState("");
 
-    const getSpent = (category: string) => {
-        return transactions
+    // Get progress for a budget goal by category name
+    // For expense categories: tracks spending against limit
+    // For savings/income categories: tracks income as progress toward goal
+    const getProgress = (category: string) => {
+        const expenses = transactions
             .filter((t) => t.type === "expense" && t.category === category)
             .reduce((sum, t) => sum + t.amount, 0);
+        
+        const income = transactions
+            .filter((t) => t.type === "income" && t.category === category)
+            .reduce((sum, t) => sum + t.amount, 0);
+        
+        // If there's income for this category, treat it as a savings goal
+        // Otherwise, treat it as an expense budget
+        return { expenses, income, isSavingsGoal: income > 0 && expenses === 0 };
     };
 
     const calculateProgress = (spent: number, limit: number) => {
@@ -106,25 +117,37 @@ export default function BudgetGoals({ transactions }: { transactions: Transactio
                     />
                 ) : (
                     budgets.map((b) => {
-                        const spent = getSpent(b.category);
-                        const progress = calculateProgress(spent, b.limit);
-                        const isOver = spent > b.limit;
+                        const { expenses, income, isSavingsGoal } = getProgress(b.category);
+                        const currentAmount = isSavingsGoal ? income : expenses;
+                        const progress = calculateProgress(currentAmount, b.limit);
+                        const isOver = expenses > b.limit && !isSavingsGoal;
+                        const isGoalReached = isSavingsGoal && income >= b.limit;
 
                         return (
                             <div key={b.category} className="group">
                                 <div className="flex items-center justify-between mb-2">
                                     <div className="flex items-center gap-2">
                                         <span className="font-semibold text-white text-sm">{b.category}</span>
+                                        {isSavingsGoal && (
+                                            <span className="rounded bg-blue-500/10 border border-blue-500/20 px-1.5 py-0.5 text-[10px] font-bold uppercase text-blue-400 tracking-wide">
+                                                Savings
+                                            </span>
+                                        )}
                                         {isOver && (
                                             <span className="rounded bg-red-500/10 border border-red-500/20 px-1.5 py-0.5 text-[10px] font-bold uppercase text-red-400 tracking-wide">
                                                 Exceeded
                                             </span>
                                         )}
+                                        {isGoalReached && (
+                                            <span className="rounded bg-green-500/10 border border-green-500/20 px-1.5 py-0.5 text-[10px] font-bold uppercase text-green-400 tracking-wide">
+                                                Reached
+                                            </span>
+                                        )}
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <span className="text-xs text-text-secondary">
-                                            <span className={`font-bold ${isOver ? "text-red-400" : "text-white"}`}>
-                                                {formatAmount(spent)}
+                                            <span className={`font-bold ${isOver ? "text-red-400" : isGoalReached ? "text-green-400" : "text-white"}`}>
+                                                {formatAmount(currentAmount)}
                                             </span>{" "}
                                             <span className="text-text-muted">/</span> {formatAmount(b.limit)}
                                         </span>
@@ -139,7 +162,7 @@ export default function BudgetGoals({ transactions }: { transactions: Transactio
                                 </div>
                                 <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
                                     <div
-                                        className={`h-full rounded-full transition-all duration-700 ease-out ${getProgressColor(progress)}`}
+                                        className={`h-full rounded-full transition-all duration-700 ease-out ${isSavingsGoal ? "bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]" : getProgressColor(progress)}`}
                                         style={{ width: `${progress}%` }}
                                     />
                                 </div>

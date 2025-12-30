@@ -1,46 +1,41 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { ArrowRight, PieChart, Shield, TrendingUp, Wallet, Layout } from "lucide-react";
+import { ArrowRight, Wallet, ChevronRight } from "lucide-react";
 
 export default function Landing() {
     const navigate = useNavigate();
     const { currentUser } = useAuth();
 
     return (
-        <div className="min-h-screen bg-[#16161d] font-sans text-white selection:bg-slate-700 selection:text-white">
-            {/* Navbar */}
-            <nav className="fixed top-0 z-50 w-full border-b border-white/5 bg-[#16161d]/90 backdrop-blur-md">
-                <div className="container mx-auto flex h-20 items-center justify-between px-6 lg:px-12">
-                    <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 text-white border border-white/5">
-                            <Wallet size={18} />
-                        </div>
-                        <span className="text-lg font-semibold tracking-tight text-white">
-                            Finance<span className="text-slate-400">Tracker</span>
-                        </span>
+        <div className="min-h-screen bg-[#111113] font-sans text-white">
+            {/* Navbar - minimal */}
+            <nav className="fixed top-0 z-50 w-full">
+                <div className="container mx-auto flex h-16 items-center justify-between px-6">
+                    <div className="flex items-center gap-2">
+                        <Wallet size={20} className="text-emerald-400" />
+                        <span className="text-sm font-medium text-white/90">FinanceTracker</span>
                     </div>
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-4">
                         {currentUser ? (
                             <button
                                 onClick={() => navigate("/dashboard")}
-                                className="group flex items-center gap-2 text-sm font-medium text-white hover:text-slate-300 transition-colors"
+                                className="text-sm text-white/70 hover:text-white transition-colors"
                             >
                                 Dashboard
-                                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
                             </button>
                         ) : (
                             <>
                                 <button
                                     onClick={() => navigate("/login")}
-                                    className="text-sm font-medium text-slate-400 hover:text-white transition-colors"
+                                    className="text-sm text-white/50 hover:text-white transition-colors"
                                 >
-                                    Log In
+                                    Sign in
                                 </button>
                                 <button
                                     onClick={() => navigate("/register")}
-                                    className="rounded-lg bg-white px-5 py-2 text-sm font-semibold text-[#16161d] transition-all hover:bg-slate-200 active:scale-95"
+                                    className="text-sm text-white bg-white/10 hover:bg-white/15 px-4 py-2 rounded-lg transition-colors"
                                 >
-                                    Get Started
+                                    Get started
                                 </button>
                             </>
                         )}
@@ -48,89 +43,117 @@ export default function Landing() {
                 </div>
             </nav>
 
-            {/* Hero Section */}
-            <section className="relative pt-32 pb-24 lg:pt-48 lg:pb-32">
-                <div className="container relative mx-auto px-6 text-center lg:px-12">
+            {/* Hero - Clean & Direct */}
+            <section className="relative pt-32 pb-8 lg:pt-40">
+                <div className="container mx-auto px-6">
+                    <div className="max-w-3xl">
+                        <div className="mb-6 inline-flex items-center gap-2 text-xs text-emerald-400/80 font-medium tracking-wide uppercase">
+                            <span className="w-8 h-px bg-emerald-400/50"></span>
+                            Open Source
+                        </div>
+                        
+                        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold text-white leading-[1.1] tracking-tight mb-6">
+                            Know where your<br />
+                            <span className="text-white/40">money goes.</span>
+                        </h1>
 
-                    <h1 className="mx-auto max-w-4xl text-5xl font-medium tracking-tight text-white mb-8 sm:text-7xl leading-[1.1]">
-                        Financial clarity for the <br />
-                        <span className="text-slate-400">modern professional.</span>
-                    </h1>
+                        <p className="text-lg text-white/40 max-w-lg mb-10 leading-relaxed">
+                            Simple expense tracking. Set budgets, monitor spending, 
+                            automate recurring payments. No complexity.
+                        </p>
 
-                    <p className="mx-auto mb-12 max-w-2xl text-lg text-slate-500 leading-relaxed font-light sm:text-xl">
-                        A minimal, distration-free tool to track your income and expenses.
-                        No clutter, just the insights you need to grow your wealth.
-                    </p>
-
-                    <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                        <button
-                            onClick={() => navigate(currentUser ? "/dashboard" : "/register")}
-                            className="group flex min-w-[180px] items-center justify-center gap-2 rounded-lg bg-white px-8 py-3.5 text-base font-semibold text-[#16161d] transition-all hover:bg-slate-200 active:scale-[0.98]"
-                        >
-                            {currentUser ? "Go to Dashboard" : "Start Tracking"}
-                            <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
-                        </button>
-                        <button className="flex min-w-[180px] items-center justify-center gap-2 rounded-lg border border-white/10 px-8 py-3.5 text-base font-medium text-slate-300 transition-all hover:bg-white/5 hover:text-white active:scale-[0.98]">
-                            Learn More
-                        </button>
-                    </div>
-
-                    {/* Dashboard Preview - Abstract & Clean */}
-                    <div className="relative mx-auto mt-24 max-w-5xl rounded-2xl border border-white/5 bg-[#1e1e26] p-2 shadow-2xl">
-                        <div className="rounded-xl overflow-hidden bg-[#16161d] aspect-[16/9] flex items-center justify-center border border-white/5">
-                            <div className="text-center p-8 opacity-50">
-                                <Layout size={64} className="mx-auto mb-4 text-slate-600" strokeWidth={1} />
-                                <p className="text-slate-600 font-mono text-sm tracking-widest uppercase">Dashboard Preview</p>
-                            </div>
+                        <div className="flex flex-wrap items-center gap-4">
+                            <button
+                                onClick={() => navigate(currentUser ? "/dashboard" : "/register")}
+                                className="group flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-black font-medium px-6 py-3 rounded-lg transition-all"
+                            >
+                                {currentUser ? "Open Dashboard" : "Start tracking"}
+                                <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+                            </button>
+                            <button
+                                onClick={() => navigate("/login")}
+                                className="text-white/50 hover:text-white text-sm transition-colors"
+                            >
+                                I have an account
+                            </button>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Minimal Features Grid */}
-            <section className="py-24 border-t border-white/5 bg-[#16161d]">
-                <div className="container mx-auto px-6 lg:px-12">
-                    <div className="grid gap-12 md:grid-cols-3">
-                        <div className="group">
-                            <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-900/10 text-emerald-500 border border-emerald-500/10">
-                                <TrendingUp size={24} />
-                            </div>
-                            <h3 className="mb-3 text-xl font-medium text-white">Smart Tracking</h3>
-                            <p className="text-slate-500 leading-relaxed font-light">
-                                Log transactions instantly. We organize your financial data into clear, actionable insights.
+            {/* App Preview */}
+            <section className="py-16">
+                <div className="container mx-auto px-6">
+                    <div className="relative rounded-xl border border-white/[0.08] bg-white/[0.02] p-1.5 max-w-5xl mx-auto">
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#111113] z-10 pointer-events-none rounded-xl"></div>
+                        <img 
+                            src="https://i.ibb.co/4RRGJsTd/Capture-d-e-cran-2025-12-30-a-01-19-50.png" 
+                            alt="Dashboard"
+                            className="rounded-lg w-full"
+                        />
+                    </div>
+                </div>
+            </section>
+
+            {/* Features - Minimal list */}
+            <section className="py-20 border-t border-white/[0.05]">
+                <div className="container mx-auto px-6">
+                    <div className="grid lg:grid-cols-2 gap-16 items-start">
+                        <div>
+                            <h2 className="text-2xl font-semibold text-white mb-4">
+                                Built for clarity.
+                            </h2>
+                            <p className="text-white/40 leading-relaxed">
+                                No bloated features. Just the essentials to understand 
+                                your finances and make better decisions.
                             </p>
                         </div>
-                        <div className="group">
-                            <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-blue-900/10 text-blue-500 border border-blue-500/10">
-                                <PieChart size={24} />
-                            </div>
-                            <h3 className="mb-3 text-xl font-medium text-white">Visual Analytics</h3>
-                            <p className="text-slate-500 leading-relaxed font-light">
-                                Understand your spending habits with elegant charts that focus on what matters most.
-                            </p>
-                        </div>
-                        <div className="group">
-                            <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-slate-800 text-slate-300 border border-white/10">
-                                <Shield size={24} />
-                            </div>
-                            <h3 className="mb-3 text-xl font-medium text-white">Secure & Private</h3>
-                            <p className="text-slate-500 leading-relaxed font-light">
-                                Your financial data is encrypted and stored securely. We prioritize your privacy above all.
-                            </p>
+
+                        <div className="space-y-0">
+                            {[
+                                { title: "Expense Tracking", desc: "Log transactions with categories" },
+                                { title: "Budget Goals", desc: "Set limits, track progress" },
+                                { title: "Visual Reports", desc: "Charts that make sense" },
+                                { title: "Recurring Payments", desc: "Automate regular expenses" },
+                            ].map((feature, i) => (
+                                <div 
+                                    key={i} 
+                                    className="flex items-center justify-between py-5 border-b border-white/[0.05] group"
+                                >
+                                    <div>
+                                        <h3 className="text-white font-medium mb-1">{feature.title}</h3>
+                                        <p className="text-sm text-white/30">{feature.desc}</p>
+                                    </div>
+                                    <ChevronRight size={16} className="text-white/20 group-hover:text-emerald-400 group-hover:translate-x-1 transition-all" />
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Minimal Footer */}
-            <footer className="border-t border-white/5 bg-[#16161d] py-12">
-                <div className="container mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-slate-600 lg:px-12 text-sm">
-                    <p>&copy; 2025 Finance Tracker.</p>
-                    <div className="flex gap-8">
-                        <a href="#" className="hover:text-slate-400 transition-colors">Privacy</a>
-                        <a href="#" className="hover:text-slate-400 transition-colors">Terms</a>
-                        <a href="#" className="hover:text-slate-400 transition-colors">Contact</a>
-                    </div>
+            {/* CTA - Simple */}
+            <section className="py-24 border-t border-white/[0.05]">
+                <div className="container mx-auto px-6 text-center">
+                    <p className="text-white/30 text-sm mb-4">Free forever. Your data stays private.</p>
+                    <h2 className="text-3xl font-semibold text-white mb-8">
+                        Ready to start?
+                    </h2>
+                    <button
+                        onClick={() => navigate(currentUser ? "/dashboard" : "/register")}
+                        className="group inline-flex items-center gap-2 bg-white text-black font-medium px-8 py-4 rounded-lg hover:bg-white/90 transition-all"
+                    >
+                        {currentUser ? "Go to Dashboard" : "Create free account"}
+                        <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+                    </button>
+                </div>
+            </section>
+
+            {/* Footer - Minimal */}
+            <footer className="py-8 border-t border-white/[0.05]">
+                <div className="container mx-auto px-6 flex items-center justify-between text-xs text-white/30">
+                    <span>FinanceTracker</span>
+                    <span>&copy; {new Date().getFullYear()}</span>
                 </div>
             </footer>
         </div>

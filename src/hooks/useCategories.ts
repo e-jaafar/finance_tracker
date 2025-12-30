@@ -23,8 +23,9 @@ export function useCategories() {
     const [error, setError] = useState<string | null>(null);
     const { currentUser } = useAuth();
     
-    // Flag to prevent double initialization during reset
+    // Flags to prevent double initialization during reset or initial load
     const isResettingRef = useRef(false);
+    const isInitializingRef = useRef(false);
 
     useEffect(() => {
         if (!currentUser) {
@@ -45,9 +46,12 @@ export function useCategories() {
                     ...doc.data(),
                 })) as Category[];
 
-                // If no categories exist and we're not in the middle of a reset, initialize defaults
-                if (docs.length === 0 && !snapshot.metadata.fromCache && !isResettingRef.current) {
-                    initializeDefaults(currentUser.uid);
+                // If no categories exist and we're not in the middle of a reset or initialization, initialize defaults
+                if (docs.length === 0 && !snapshot.metadata.fromCache && !isResettingRef.current && !isInitializingRef.current) {
+                    isInitializingRef.current = true;
+                    initializeDefaults(currentUser.uid).finally(() => {
+                        isInitializingRef.current = false;
+                    });
                 } else {
                     setCategories(docs);
                 }

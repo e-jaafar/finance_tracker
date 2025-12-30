@@ -63,6 +63,8 @@ export default function Profile() {
             setLinkingAccount(true);
             await linkGuestAccount(linkEmailRef.current.value, linkPasswordRef.current.value);
             showToast("Account created successfully! Your data has been saved.", "success");
+            // Reload the page to refresh auth state
+            window.location.reload();
         } catch (err: any) {
             showToast(getAuthErrorMessage(err.code), "error");
         } finally {
@@ -110,7 +112,7 @@ export default function Profile() {
 
     const inputClassName = "w-full rounded-lg border border-white/10 bg-[#16161d] px-4 py-3 pl-11 text-white outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 transition-all placeholder-slate-600";
     const labelClassName = "mb-2 block text-xs font-semibold text-slate-400 uppercase tracking-wider";
-    const iconClassName = "absolute left-4 top-[3rem] text-slate-500";
+    const iconClassName = "absolute left-4 top-1/2 -translate-y-1/2 text-slate-500";
 
     return (
         <div className="min-h-screen bg-[#16161d] pb-20 font-sans text-white selection:bg-slate-700 selection:text-white">
@@ -172,45 +174,51 @@ export default function Profile() {
                             </p>
 
                             <form onSubmit={handleLinkAccount} className="space-y-5">
-                                <div className="relative">
+                                <div>
                                     <label className={labelClassName}>Email Address</label>
-                                    <input
-                                        type="email"
-                                        ref={linkEmailRef}
-                                        required
-                                        className={inputClassName}
-                                        placeholder="your@email.com"
-                                        autoComplete="email"
-                                    />
-                                    <Mail className={iconClassName} size={18} />
+                                    <div className="relative">
+                                        <Mail className={iconClassName} size={18} />
+                                        <input
+                                            type="email"
+                                            ref={linkEmailRef}
+                                            required
+                                            className={inputClassName}
+                                            placeholder="your@email.com"
+                                            autoComplete="email"
+                                        />
+                                    </div>
                                 </div>
 
-                                <div className="relative">
+                                <div>
                                     <label className={labelClassName}>Password</label>
-                                    <input
-                                        type="password"
-                                        ref={linkPasswordRef}
-                                        required
-                                        minLength={6}
-                                        className={inputClassName}
-                                        placeholder="Min. 6 characters"
-                                        autoComplete="new-password"
-                                    />
-                                    <Lock className={iconClassName} size={18} />
+                                    <div className="relative">
+                                        <Lock className={iconClassName} size={18} />
+                                        <input
+                                            type="password"
+                                            ref={linkPasswordRef}
+                                            required
+                                            minLength={6}
+                                            className={inputClassName}
+                                            placeholder="Min. 6 characters"
+                                            autoComplete="new-password"
+                                        />
+                                    </div>
                                 </div>
 
-                                <div className="relative">
+                                <div>
                                     <label className={labelClassName}>Confirm Password</label>
-                                    <input
-                                        type="password"
-                                        ref={linkPasswordConfirmRef}
-                                        required
-                                        minLength={6}
-                                        className={inputClassName}
-                                        placeholder="Confirm your password"
-                                        autoComplete="new-password"
-                                    />
-                                    <Lock className={iconClassName} size={18} />
+                                    <div className="relative">
+                                        <Lock className={iconClassName} size={18} />
+                                        <input
+                                            type="password"
+                                            ref={linkPasswordConfirmRef}
+                                            required
+                                            minLength={6}
+                                            className={inputClassName}
+                                            placeholder="Confirm your password"
+                                            autoComplete="new-password"
+                                        />
+                                    </div>
                                 </div>
 
                                 <button
@@ -230,18 +238,20 @@ export default function Profile() {
 
                             <form onSubmit={handleSubmit} className="space-y-8">
 
-                                <div className="relative">
+                                <div>
                                     <label className={labelClassName}>Email Address</label>
-                                    <input
-                                        type="email"
-                                        ref={emailRef}
-                                        required
-                                        defaultValue={currentUser?.email || ""}
-                                        className={inputClassName}
-                                        placeholder="your@email.com"
-                                        autoComplete="email"
-                                    />
-                                    <Mail className={iconClassName} size={18} />
+                                    <div className="relative">
+                                        <Mail className={iconClassName} size={18} />
+                                        <input
+                                            type="email"
+                                            ref={emailRef}
+                                            required
+                                            defaultValue={currentUser?.email || ""}
+                                            className={inputClassName}
+                                            placeholder="your@email.com"
+                                            autoComplete="email"
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="pt-6 border-t border-white/5">
@@ -250,28 +260,32 @@ export default function Profile() {
                                         Security
                                     </h3>
                                     <div className="space-y-6">
-                                        <div className="relative">
+                                        <div>
                                             <label className={labelClassName}>New Password</label>
-                                            <input
-                                                type="password"
-                                                ref={passwordRef}
-                                                className={inputClassName}
-                                                placeholder="Leave blank to keep current"
-                                                autoComplete="new-password"
-                                            />
-                                            <Lock className={iconClassName} size={18} />
+                                            <div className="relative">
+                                                <Lock className={iconClassName} size={18} />
+                                                <input
+                                                    type="password"
+                                                    ref={passwordRef}
+                                                    className={inputClassName}
+                                                    placeholder="Leave blank to keep current"
+                                                    autoComplete="new-password"
+                                                />
+                                            </div>
                                         </div>
 
-                                        <div className="relative">
+                                        <div>
                                             <label className={labelClassName}>Confirm New Password</label>
-                                            <input
-                                                type="password"
-                                                ref={passwordConfirmRef}
-                                                className={inputClassName}
-                                                placeholder="Leave blank to keep current"
-                                                autoComplete="new-password"
-                                            />
-                                            <Lock className={iconClassName} size={18} />
+                                            <div className="relative">
+                                                <Lock className={iconClassName} size={18} />
+                                                <input
+                                                    type="password"
+                                                    ref={passwordConfirmRef}
+                                                    className={inputClassName}
+                                                    placeholder="Leave blank to keep current"
+                                                    autoComplete="new-password"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

@@ -1,9 +1,9 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useCurrency, CURRENCIES } from "../contexts/CurrencyContext";
 import { useToast } from "../contexts/ToastContext";
-import { useNavigate } from "react-router-dom";
-import { User, Mail, Lock, AlertCircle, Check, ArrowLeft, Shield, Tag, Coins } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { User, Mail, Lock, ArrowLeft, Shield, Tag, Coins } from "lucide-react";
 import CategoryManager from "../components/CategoryManager";
 import { getAuthErrorMessage } from "../utils/authErrors";
 
@@ -11,13 +11,22 @@ export default function Profile() {
     const emailRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
     const passwordConfirmRef = useRef<HTMLInputElement>(null);
+    const categorySectionRef = useRef<HTMLDivElement>(null);
     const { currentUser, updateUserEmail, updateUserPassword } = useAuth();
     const { currency, setCurrency } = useCurrency();
     const { showToast } = useToast();
-    const [error, setError] = useState("");
-    const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Scroll to categories section if hash is #categories
+    useEffect(() => {
+        if (location.hash === "#categories" && categorySectionRef.current) {
+            setTimeout(() => {
+                categorySectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }, 100);
+        }
+    }, [location.hash]);
 
     async function handleCurrencyChange(newCurrency: string) {
         try {
@@ -31,13 +40,12 @@ export default function Profile() {
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         if (passwordRef.current?.value !== passwordConfirmRef.current?.value) {
-            return setError("Passwords do not match");
+            showToast("Passwords do not match", "error");
+            return;
         }
 
         const promises = [];
         setLoading(true);
-        setError("");
-        setMessage("");
 
         if (emailRef.current?.value && emailRef.current.value !== currentUser?.email) {
             promises.push(updateUserEmail(emailRef.current.value));
@@ -46,12 +54,21 @@ export default function Profile() {
             promises.push(updateUserPassword(passwordRef.current.value));
         }
 
+        if (promises.length === 0) {
+            showToast("No changes to save", "info");
+            setLoading(false);
+            return;
+        }
+
         Promise.all(promises)
             .then(() => {
-                setMessage("Profile updated successfully");
+                showToast("Profile updated successfully", "success");
+                // Clear password fields after successful update
+                if (passwordRef.current) passwordRef.current.value = "";
+                if (passwordConfirmRef.current) passwordConfirmRef.current.value = "";
             })
             .catch((err) => {
-                setError(getAuthErrorMessage(err.code));
+                showToast(getAuthErrorMessage(err.code), "error");
             })
             .finally(() => {
                 setLoading(false);
@@ -69,7 +86,7 @@ export default function Profile() {
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 items-center">
                         <button
-                            onClick={() => navigate("/")}
+                            onClick={() => navigate("/dashboard")}
                             className="group mr-4 flex items-center gap-2 rounded-lg py-2 pr-4 text-sm font-medium text-slate-400 transition-colors hover:text-white"
                         >
                             <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
@@ -94,20 +111,6 @@ export default function Profile() {
 
                     <div className="rounded-2xl border border-white/5 bg-[#1e1e26] p-8 shadow-2xl">
 
-                        {error && (
-                            <div className="mb-6 flex items-center gap-3 rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm font-medium text-red-200 animate-in slide-in-from-top-2">
-                                <AlertCircle size={18} className="shrink-0" />
-                                {error}
-                            </div>
-                        )}
-
-                        {message && (
-                            <div className="mb-6 flex items-center gap-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm font-medium text-emerald-200 animate-in slide-in-from-top-2">
-                                <Check size={18} className="shrink-0" />
-                                {message}
-                            </div>
-                        )}
-
                         <form onSubmit={handleSubmit} className="space-y-8">
 
                             <div className="relative">
@@ -119,6 +122,7 @@ export default function Profile() {
                                     defaultValue={currentUser?.email || ""}
                                     className={inputClassName}
                                     placeholder="your@email.com"
+                                    autoComplete="email"
                                 />
                                 <Mail className={iconClassName} size={18} />
                             </div>
@@ -136,6 +140,7 @@ export default function Profile() {
                                             ref={passwordRef}
                                             className={inputClassName}
                                             placeholder="Leave blank to keep current"
+                                            autoComplete="new-password"
                                         />
                                         <Lock className={iconClassName} size={18} />
                                     </div>
@@ -147,6 +152,7 @@ export default function Profile() {
                                             ref={passwordConfirmRef}
                                             className={inputClassName}
                                             placeholder="Leave blank to keep current"
+                                            autoComplete="new-password"
                                         />
                                         <Lock className={iconClassName} size={18} />
                                     </div>
@@ -174,14 +180,6 @@ export default function Profile() {
                                 </div>
                             </div>
 
-                            <div className="pt-6 border-t border-white/5">
-                                <h3 className="text-sm font-bold text-white mb-6 flex items-center gap-2">
-                                    <Tag size={16} className="text-slate-400" />
-                                    Category Management
-                                </h3>
-                                <CategoryManager />
-                            </div>
-
                             <div className="pt-4">
                                 <button
                                     type="submit"
@@ -192,6 +190,15 @@ export default function Profile() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+
+                    {/* Category Management - Outside the form */}
+                    <div ref={categorySectionRef} id="categories" className="mt-8 rounded-2xl border border-white/5 bg-[#1e1e26] p-8 shadow-2xl scroll-mt-24">
+                        <h3 className="text-sm font-bold text-white mb-6 flex items-center gap-2">
+                            <Tag size={16} className="text-slate-400" />
+                            Category Management
+                        </h3>
+                        <CategoryManager />
                     </div>
                 </div>
             </main>

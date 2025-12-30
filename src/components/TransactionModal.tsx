@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useTransactions } from "../hooks/useTransactions";
 import { useAuth } from "../contexts/AuthContext";
 import { useCategories } from "../hooks/useCategories";
-import { X, Check, Repeat } from "lucide-react";
+import { useCurrency } from "../contexts/CurrencyContext";
+import { X, Check, Repeat, Settings } from "lucide-react";
 import type { Transaction } from "../hooks/useTransactions";
 
 interface TransactionModalProps {
@@ -15,6 +16,7 @@ export default function TransactionModal({ isOpen, onClose, existingTransaction 
     const { addTransaction, updateTransaction } = useTransactions();
     const { categories } = useCategories();
     const { currentUser } = useAuth();
+    const { currencyInfo } = useCurrency();
 
     // State
     const [type, setType] = useState<"income" | "expense">("expense");
@@ -133,16 +135,21 @@ export default function TransactionModal({ isOpen, onClose, existingTransaction 
 
                     <div className="grid grid-cols-2 gap-5">
                         <div className="col-span-2 sm:col-span-1">
-                            <label className={labelClassName}>Amount ($)</label>
-                            <input
-                                type="number"
-                                step="0.01"
-                                required
-                                value={amount}
-                                onChange={(e) => setAmount(e.target.value)}
-                                className={inputClassName}
-                                placeholder="0.00"
-                            />
+                            <label className={labelClassName}>Amount ({currencyInfo.symbol})</label>
+                            <div className="relative">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted font-medium">
+                                    {currencyInfo.symbol}
+                                </span>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    required
+                                    value={amount}
+                                    onChange={(e) => setAmount(e.target.value)}
+                                    className={`${inputClassName} pl-10`}
+                                    placeholder="0.00"
+                                />
+                            </div>
                         </div>
                         <div className="col-span-2 sm:col-span-1">
                             <label className={labelClassName}>Date</label>
@@ -203,7 +210,21 @@ export default function TransactionModal({ isOpen, onClose, existingTransaction 
                     </div>
 
                     <div>
-                        <label className={labelClassName}>Category</label>
+                        <div className="flex items-center justify-between mb-2">
+                            <label className="block text-xs font-bold text-text-secondary uppercase tracking-wide">Category</label>
+                            <a 
+                                href="/profile#categories" 
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    onClose();
+                                    window.location.href = "/profile#categories";
+                                }}
+                                className="flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+                            >
+                                <Settings size={12} />
+                                Manage
+                            </a>
+                        </div>
                         <select
                             required
                             value={category}

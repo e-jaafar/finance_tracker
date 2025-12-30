@@ -61,21 +61,21 @@ function ToastContainer({ toasts, onClose }: { toasts: Toast[]; onClose: (id: st
     };
 
     const styles = {
-        success: "bg-green-500/10 border-green-500/20 text-green-400",
-        error: "bg-red-500/10 border-red-500/20 text-red-400",
-        warning: "bg-amber-500/10 border-amber-500/20 text-amber-400",
-        info: "bg-blue-500/10 border-blue-500/20 text-blue-400"
+        success: "bg-green-600 border-green-500 text-white",
+        error: "bg-red-600 border-red-500 text-white",
+        warning: "bg-amber-600 border-amber-500 text-white",
+        info: "bg-blue-600 border-blue-500 text-white"
     };
 
     return (
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
+        <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3">
             {toasts.map((toast) => (
                 <div
                     key={toast.id}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl border backdrop-blur-sm shadow-lg animate-in slide-in-from-right-5 fade-in duration-300 ${styles[toast.type]}`}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl border shadow-2xl animate-in slide-in-from-right-5 fade-in duration-300 ${styles[toast.type]}`}
                 >
                     {icons[toast.type]}
-                    <span className="text-sm font-medium text-white">{toast.message}</span>
+                    <span className="text-sm font-medium">{toast.message}</span>
                     <button
                         onClick={() => onClose(toast.id)}
                         className="ml-2 p-1 hover:bg-white/10 rounded-lg transition-colors"

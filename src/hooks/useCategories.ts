@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
     collection,
     addDoc,
@@ -8,7 +8,9 @@ import {
     deleteDoc,
     doc,
     serverTimestamp,
-    writeBatch
+    writeBatch,
+    getDocs,
+    updateDoc
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../contexts/AuthContext";
@@ -20,6 +22,9 @@ export function useCategories() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const { currentUser } = useAuth();
+    
+    // Flag to prevent double initialization during reset
+    const isResettingRef = useRef(false);
 
     useEffect(() => {
         if (!currentUser) {
@@ -40,8 +45,8 @@ export function useCategories() {
                     ...doc.data(),
                 })) as Category[];
 
-                // If no categories exist, initialize defaults
-                if (docs.length === 0 && !snapshot.metadata.fromCache) {
+                // If no categories exist and we're not in the middle of a reset, initialize defaults
+                if (docs.length === 0 && !snapshot.metadata.fromCache && !isResettingRef.current) {
                     initializeDefaults(currentUser.uid);
                 } else {
                     setCategories(docs);
@@ -77,6 +82,39 @@ export function useCategories() {
         }
     }
 
+    async function resetToDefaults() {
+        if (!currentUser) return;
+        
+        // Set flag to prevent onSnapshot from re-initializing
+        isResettingRef.current = true;
+        
+        try {
+            const collectionRef = collection(db, "users", currentUser.uid, "categories");
+            
+            // Delete all existing categories
+            const snapshot = await getDocs(collectionRef);
+            const batch = writeBatch(db);
+            
+            snapshot.docs.forEach((document) => {
+                batch.delete(doc(db, "users", currentUser.uid, "categories", document.id));
+            });
+            
+            // Add all default categories
+            DEFAULT_CATEGORIES.forEach(cat => {
+                const docRef = doc(collectionRef);
+                batch.set(docRef, { ...cat, isDefault: true, createdAt: serverTimestamp() });
+            });
+            
+            await batch.commit();
+        } catch (err) {
+            console.error("Error resetting categories:", err);
+            throw new Error("Erreur lors de la réinitialisation des catégories");
+        } finally {
+            // Reset flag after operation completes
+            isResettingRef.current = false;
+        }
+    }
+
     async function addCategory(category: Omit<Category, "id">) {
         if (!currentUser) return;
         try {
@@ -90,6 +128,19 @@ export function useCategories() {
         }
     }
 
+    async function updateCategory(id: string, data: Partial<Omit<Category, "id">>) {
+        if (!currentUser) return;
+        try {
+            await updateDoc(doc(db, "users", currentUser.uid, "categories", id), {
+                ...data,
+                updatedAt: serverTimestamp(),
+            });
+        } catch (err) {
+            console.error("Error updating category:", err);
+            throw new Error("Erreur lors de la mise à jour de la catégorie");
+        }
+    }
+
     async function deleteCategory(id: string) {
         if (!currentUser) return;
         try {
@@ -100,5 +151,5 @@ export function useCategories() {
         }
     }
 
-    return { categories, loading, error, addCategory, deleteCategory };
+    return { categories, loading, error, addCategory, updateCategory, deleteCategory, resetToDefaults };
 }

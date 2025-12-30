@@ -1,14 +1,14 @@
 import { useRef, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
-import { Lock, Mail, ChevronRight, UserPlus } from "lucide-react";
+import { Lock, Mail, ChevronRight, UserPlus, User } from "lucide-react";
 import { getAuthErrorMessage } from "../utils/authErrors";
 
 export default function Register() {
     const emailRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
     const passwordConfirmRef = useRef<HTMLInputElement>(null);
-    const { signup, signInWithGoogle } = useAuth();
+    const { signup, signInWithGoogle, signInAsGuest } = useAuth();
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -18,6 +18,18 @@ export default function Register() {
             setError("");
             setLoading(true);
             await signInWithGoogle();
+            navigate("/dashboard");
+        } catch (err: any) {
+            setError(getAuthErrorMessage(err.code));
+        }
+        setLoading(false);
+    }
+
+    async function handleGuestSignIn() {
+        try {
+            setError("");
+            setLoading(true);
+            await signInAsGuest();
             navigate("/dashboard");
         } catch (err: any) {
             setError(getAuthErrorMessage(err.code));
@@ -155,6 +167,16 @@ export default function Register() {
                                 />
                             </svg>
                             Google
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={handleGuestSignIn}
+                            disabled={loading}
+                            className="w-full bg-transparent hover:bg-slate-800/50 text-slate-400 hover:text-white font-medium py-3.5 rounded-lg border border-white/5 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                        >
+                            <User size={18} />
+                            Continue as Guest
                         </button>
                     </form>
                 </div>

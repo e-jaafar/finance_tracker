@@ -14,11 +14,11 @@ import RecurringManager from "../components/RecurringManager";
 import TransactionModal from "../components/TransactionModal";
 import type { Transaction } from "../hooks/useTransactions";
 import { exportTransactionsToCSV } from "../utils/exportCsv";
-import { LogOut, Wallet, User, Download } from "lucide-react";
+import { LogOut, Wallet, User, Download, UserCircle } from "lucide-react";
 
 export default function Dashboard() {
     const [error, setError] = useState("");
-    const { currentUser, logout } = useAuth();
+    const { currentUser, logout, isGuest } = useAuth();
     const { showToast } = useToast();
     const { formatAmount } = useCurrency();
     const { transactions, deleteTransaction, loading } = useTransactions();
@@ -118,9 +118,16 @@ export default function Dashboard() {
 
                         <div className="flex items-center gap-3">
                             <div className="flex items-center gap-3 mr-4">
-                                <span className="text-xs font-medium text-text-secondary hidden md:block">
-                                    {currentUser?.email}
-                                </span>
+                                {isGuest ? (
+                                    <span className="flex items-center gap-1.5 text-xs font-medium text-amber-400 bg-amber-400/10 px-2 py-1 rounded-md">
+                                        <UserCircle size={14} />
+                                        Guest
+                                    </span>
+                                ) : (
+                                    <span className="text-xs font-medium text-text-secondary hidden md:block">
+                                        {currentUser?.email}
+                                    </span>
+                                )}
                             </div>
 
                             <button
@@ -128,7 +135,7 @@ export default function Dashboard() {
                                 className="group flex h-9 items-center justify-center gap-2 rounded-lg border border-white/10 bg-surface px-4 text-sm font-medium text-text-secondary transition-all hover:bg-surfaceHighlight hover:text-white hover:border-white/20"
                             >
                                 <User size={16} className="text-indigo-400 group-hover:text-indigo-300" />
-                                <span className="hidden sm:inline">Profile</span>
+                                <span className="hidden sm:inline">{isGuest ? "Create Account" : "Profile"}</span>
                             </button>
                             <button
                                 onClick={handleLogout}

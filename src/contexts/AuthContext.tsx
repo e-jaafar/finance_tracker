@@ -7,18 +7,24 @@ import {
     onAuthStateChanged,
     updateEmail,
     updatePassword,
-    signInWithPopup
+    signInWithPopup,
+    signInAnonymously,
+    linkWithCredential,
+    EmailAuthProvider
 } from "firebase/auth";
 import type { User } from "firebase/auth";
 
 interface AuthContextType {
     currentUser: User | null;
+    isGuest: boolean;
     signup: (email: string, pass: string) => Promise<any>;
     login: (email: string, pass: string) => Promise<any>;
     logout: () => Promise<void>;
     updateUserEmail: (email: string) => Promise<void>;
     updateUserPassword: (password: string) => Promise<void>;
     signInWithGoogle: () => Promise<any>;
+    signInAsGuest: () => Promise<any>;
+    linkGuestAccount: (email: string, password: string) => Promise<any>;
     loading: boolean;
 }
 
@@ -36,6 +42,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
+    // Check if user is anonymous (guest)
+    const isGuest = currentUser?.isAnonymous ?? false;
+
     function signup(email: string, pass: string) {
         return createUserWithEmailAndPassword(auth, email, pass);
     }
@@ -50,6 +59,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     function signInWithGoogle() {
         return signInWithPopup(auth, googleProvider);
+    }
+
+    function signInAsGuest() {
+        return signInAnonymously(auth);
+    }
+
+    async function linkGuestAccount(email: string, password: string) {
+        if (!currentUser) throw new Error("No user logged in");
+        if (!currentUser.isAnonymous) throw new Error("User is not a guest");
+        
+        const credential = EmailAuthProvider.credential(email, password);
+        return linkWithCredential(currentUser, credential);
     }
 
     function updateUserEmail(email: string) {
@@ -73,12 +94,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const value = {
         currentUser,
+        isGuest,
         signup,
         login,
         logout,
         updateUserEmail,
         updateUserPassword,
         signInWithGoogle,
+        signInAsGuest,
+        linkGuestAccount,
         loading,
     };
 

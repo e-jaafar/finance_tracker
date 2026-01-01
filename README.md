@@ -8,6 +8,119 @@ A modern, open-source personal finance management app. Track expenses, set budge
 
 ---
 
+## Architecture
+
+```mermaid
+flowchart TB
+    subgraph Client["Frontend (React 19 + TypeScript)"]
+        direction TB
+        
+        subgraph Pages["Pages"]
+            Landing["Landing"]
+            Login["Login"]
+            Register["Register"]
+            Dashboard["Dashboard"]
+            Profile["Profile"]
+        end
+        
+        subgraph Components["Components"]
+            AddTx["AddTransactionForm"]
+            TxList["TransactionList"]
+            TxModal["TransactionModal"]
+            Filters["TransactionFilters"]
+            Charts["FinancialCharts"]
+            Budget["BudgetGoals"]
+            Category["CategoryManager"]
+            Recurring["RecurringManager"]
+        end
+        
+        subgraph Contexts["Contexts"]
+            AuthCtx["AuthContext"]
+            CurrencyCtx["CurrencyContext"]
+            ToastCtx["ToastContext"]
+        end
+        
+        subgraph Hooks["Custom Hooks"]
+            useTx["useTransactions"]
+            useBudget["useBudgets"]
+            useCat["useCategories"]
+            useRec["useRecurring"]
+        end
+    end
+    
+    subgraph Firebase["Firebase Backend"]
+        direction TB
+        Auth["Firebase Auth"]
+        Firestore["Cloud Firestore"]
+        
+        subgraph Collections["Collections"]
+            Users["users/{userId}"]
+            Transactions["transactions"]
+            Budgets["budgets"]
+            Categories["categories"]
+            RecurringTx["recurring"]
+        end
+    end
+    
+    subgraph External["External Services"]
+        Vercel["Vercel Hosting"]
+        ChartJS["Chart.js"]
+    end
+
+    %% Connections
+    Pages --> Components
+    Components --> Hooks
+    Hooks --> Contexts
+    Contexts --> Auth
+    Hooks --> Firestore
+    
+    Users --> Transactions
+    Users --> Budgets
+    Users --> Categories
+    Users --> RecurringTx
+    
+    Charts --> ChartJS
+    Client --> Vercel
+    
+    %% Styling
+    classDef firebase fill:#FFCA28,stroke:#F57C00,color:#000
+    classDef react fill:#61DAFB,stroke:#21232a,color:#000
+    classDef external fill:#9C27B0,stroke:#6A1B9A,color:#fff
+    
+    class Auth,Firestore,Users,Transactions,Budgets,Categories,RecurringTx firebase
+    class Landing,Login,Register,Dashboard,Profile,AddTx,TxList,TxModal,Filters,Charts,Budget,Category,Recurring,AuthCtx,CurrencyCtx,ToastCtx,useTx,useBudget,useCat,useRec react
+    class Vercel,ChartJS external
+```
+
+### Data Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant R as React App
+    participant H as Custom Hooks
+    participant F as Firebase Auth
+    participant DB as Firestore
+
+    U->>R: Login/Register
+    R->>F: Authenticate
+    F-->>R: User Session
+    R->>H: Initialize Hooks
+    H->>DB: onSnapshot (Real-time)
+    DB-->>H: Live Data Updates
+    H-->>R: State Update
+    R-->>U: Render UI
+
+    U->>R: Add Transaction
+    R->>H: useTransactions.add()
+    H->>DB: Write Document
+    DB-->>H: Confirmation
+    H-->>R: Updated State
+    R-->>U: UI Refresh
+```
+
+---
+
 ## Features
 
 ### Transaction Management
